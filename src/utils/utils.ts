@@ -155,7 +155,7 @@ function writeConfig(config: Config): void {
 	try {
 		fs.writeFileSync(path.join(__dirname, '../config.json'), JSON.stringify(config));
 	} catch (error) {
-		console.error('Writing config failed: ', error);
+		console.error('Writing config failed: \n', error);
 	}
 }
 
@@ -225,8 +225,8 @@ function addReaction(message: Message, emojis: EmojiIdentifierResolvable[]): voi
  * @param {Message} message - *Optional* The discord.js Message of the music player.
  * @returns {PlayerManager} - Returns the PlayerManager.
  */
-function getPlayerManager(member: GuildMember, playerEmbed: false | Message): PlayerManager | string {
-	const playerManager = PlayerManager.getInstance(member);
+function getPlayerManager(member: GuildMember, main: Main, playerEmbed: false | Message): PlayerManager | string {
+	const playerManager = PlayerManager.getInstance(member, main);
 	if (member.voice.channel === null) {
 		return 'You must be in a voice channel.';
 	}

@@ -11,16 +11,18 @@ import { GuildMember, Message } from 'discord.js';
 import { createPlayer, createResourceStream } from '../utils/utils';
 import { MediaTrack, PlayerState } from '../interfaces';
 import PlayerEmbedHandler from './PlayerEmbedHandler';
+import Main from './Main';
 
 export default class PlayerManager {
 	public static instances: Map<string, PlayerManager> = new Map();
-	public static getInstance(member: GuildMember): PlayerManager {
+	public static getInstance(member: GuildMember, main: Main): PlayerManager {
 		const guildId = member.guild.id;
 		if (!PlayerManager.instances.has(guildId)) {
-			PlayerManager.instances.set(guildId, new PlayerManager());
+			PlayerManager.instances.set(guildId, new PlayerManager(main, guildId));
 		}
 		return PlayerManager.instances.get(guildId)!;
 	}
+	public main: Main;
 	public playerEmbedHandler: PlayerEmbedHandler | null = null;
 	public connection: VoiceConnection | null = null;
 	public player: AudioPlayer | null = null;
@@ -28,14 +30,15 @@ export default class PlayerManager {
 	public state: PlayerState;
 	public current: MediaTrack | null = null;
 	public queue: MediaTrack[] = [];
-	constructor() {
+	constructor(main: Main, guildId: string) {
+		this.main = main;
 		this.state = {
 			connected: false,
 			playing: false,
 			paused: false,
 			stopped: true,
 			repeat: false,
-			volume: 50,
+			volume: main.config.volume.find((v) => v.guildId === guildId)?.volume || 30,
 			idletime: 0,
 		};
 	}

@@ -64,7 +64,7 @@ export default class Main {
 			const member = message.member;
 			if (!member) return;
 			const musicMessage = await getMusicChannelMessage(message.guildId!, this);
-			const playerManager = getPlayerManager(member, musicMessage);
+			const playerManager = getPlayerManager(member, this, musicMessage);
 			if (typeof playerManager === 'string') return;
 			//handle message commands
 			const check = await checkURL(message.content);
@@ -122,7 +122,7 @@ export default class Main {
 			const member = reaction.message.guild!.members.cache.get(resolvedReaction.user.id);
 			if (!member) return;
 			const musicMessage = await getMusicChannelMessage(resolvedReaction.reaction.message.guildId!, this);
-			const playerManager = getPlayerManager(member, musicMessage);
+			const playerManager = getPlayerManager(member, this, musicMessage);
 			if (typeof playerManager === 'string') return;
 			//handle reaction commands
 			if (resolvedReaction.reaction.emoji.name === '⏯️') {
@@ -158,7 +158,7 @@ export default class Main {
 			if (oldState.channelId) {
 				const members = oldState.channel!.members.filter((m) => !m.user.bot);
 				if (members.size === 0) {
-					PlayerManager.getInstance(oldState.member!).destroyVoiceConnection();
+					PlayerManager.getInstance(oldState.member!, this).destroyVoiceConnection();
 				}
 			}
 			if (newState.channelId) {

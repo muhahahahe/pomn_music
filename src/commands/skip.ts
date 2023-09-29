@@ -1,7 +1,7 @@
 import { ChatInputCommandInteraction, GuildMember, SlashCommandBuilder } from 'discord.js';
 import Main from '../classes/Main';
 import PlayerManager from '../classes/PlayerManager';
-import { getMusicChannelMessage } from '../utils/utils';
+import { getMusicChannelMessage, getPlayerManager } from '../utils/utils';
 
 export default {
 	data: new SlashCommandBuilder().setName('skip').setDescription('Skips to the next song in queue.').setDMPermission(false),
@@ -16,14 +16,15 @@ export default {
 		const musicMessage = await getMusicChannelMessage(interaction.guildId!, main);
 		if (musicMessage && musicMessage.channelId === interaction.channelId)
 			return interaction.reply({ content: 'Use the music player functions instead of slash commands in this channel!', ephemeral: true });
-		const playerManager = PlayerManager.getInstance(member);
+		const playerManager = getPlayerManager(member, main, musicMessage);
+		if (typeof playerManager === 'string') return interaction.reply({ content: playerManager, ephemeral: true });
 		if (playerManager.isRepeated()) {
 			playerManager.repeatPlay();
 		}
 		if (playerManager.queue.length === 0) {
-			return interaction.reply({ content: 'There are no songs in queue.', ephemeral: true }).catch(console.error);
+			return interaction.reply({ content: 'There are no songs in queue.', ephemeral: true });
 		}
 		playerManager.play();
-		return interaction.reply({ content: 'Skipped to the next song in queue.', ephemeral: true }).catch(console.error);
+		return interaction.reply({ content: 'Skipped to the next song in queue.', ephemeral: true });
 	},
 };

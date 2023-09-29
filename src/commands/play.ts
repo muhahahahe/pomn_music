@@ -29,7 +29,7 @@ export default {
 		const musicMessage = await getMusicChannelMessage(interaction.guildId!, main);
 		if (musicMessage && musicMessage.channelId === interaction.channelId)
 			return interaction.reply({ content: 'Use the music player functions instead of slash commands in this channel!', ephemeral: true });
-		const playerManager = getPlayerManager(member, musicMessage);
+		const playerManager = getPlayerManager(member, main, musicMessage);
 		if (typeof playerManager === 'string') return interaction.reply({ content: playerManager, ephemeral: true });
 
 		const track = interaction.options.getString('track', true);
@@ -39,7 +39,7 @@ export default {
 		let url: string = '';
 		switch (trackType) {
 			case 'not resolvable':
-				return interaction.reply({ content: 'Media could not be resolved', ephemeral: true }).catch(console.error);
+				return interaction.reply({ content: 'Media could not be resolved', ephemeral: true });
 			case 'youtube':
 				url = track;
 				if (!track.startsWith('https')) url = 'https://' + track;
@@ -61,7 +61,7 @@ export default {
 
 				break;
 			case 'soundcloud':
-				return interaction.reply({ content: 'Soundcloud is not supported yet', ephemeral: true }).catch(console.error);
+				return interaction.reply({ content: 'Soundcloud is not supported yet', ephemeral: true });
 				// try {
 				// 	track_info = await getSoundcloud(track, interaction.user, member.voice.channel as VoiceChannel);
 				// 	playerManager.addTrack(track_info);
@@ -73,7 +73,7 @@ export default {
 				break;
 			case 'spotify':
 				//handle spotify
-				return interaction.reply({ content: 'Spotify is not supported yet', ephemeral: true }).catch(console.error);
+				return interaction.reply({ content: 'Spotify is not supported yet', ephemeral: true });
 
 				break;
 			case 'media':
@@ -90,12 +90,11 @@ export default {
 
 				break;
 		}
-		if (!track_info)
-			return interaction.reply({ content: `An error occurred while searching for *${track}*`, ephemeral: true }).catch(console.error);
+		if (!track_info) return interaction.reply({ content: `An error occurred while searching for *${track}*`, ephemeral: true });
 		let title: string = 'unknown';
 		if (track_info instanceof Object && 'title' in track_info) title = track_info.title;
 		if (track_info instanceof Object && 'name' in track_info) title = track_info.name as string;
 		if (track_info instanceof Array) title = `${track_info.length} tracks`;
-		return interaction.reply({ content: `Added *${title}* to the queue` }).catch(console.error);
+		return interaction.reply({ content: `Added *${title}* to the queue` });
 	},
 };

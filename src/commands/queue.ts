@@ -21,7 +21,7 @@ export default {
 		const musicMessage = await getMusicChannelMessage(interaction.guildId!, main);
 		if (musicMessage && musicMessage.channelId === interaction.channelId)
 			return interaction.reply({ content: 'Use the music player functions instead of slash commands in this channel!', ephemeral: true });
-		const playerManager = PlayerManager.getInstance(member);
+		const playerManager = PlayerManager.getInstance(member, main);
 		if (!playerManager.current) return interaction.reply({ content: 'Nothing is playing.', ephemeral: true });
 
 		const page = interaction.options.getInteger('page') || 0;

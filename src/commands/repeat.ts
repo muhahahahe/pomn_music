@@ -1,7 +1,7 @@
 import { ChatInputCommandInteraction, GuildMember, SlashCommandBuilder } from 'discord.js';
 import Main from '../classes/Main';
 import PlayerManager from '../classes/PlayerManager';
-import { getMusicChannelMessage } from '../utils/utils';
+import { getMusicChannelMessage, getPlayerManager } from '../utils/utils';
 
 export default {
 	data: new SlashCommandBuilder().setName('repeat').setDescription('Repeats the current song.').setDMPermission(false),
@@ -16,9 +16,10 @@ export default {
 		const musicMessage = await getMusicChannelMessage(interaction.guildId!, main);
 		if (musicMessage && musicMessage.channelId === interaction.channelId)
 			return interaction.reply({ content: 'Use the music player functions instead of slash commands in this channel!', ephemeral: true });
-		const playerManager = PlayerManager.getInstance(member);
-		if (!playerManager.current) return interaction.reply({ content: 'There is no song playing.', ephemeral: true }).catch(console.error);
+		const playerManager = getPlayerManager(member, main, musicMessage);
+		if (typeof playerManager === 'string') return interaction.reply({ content: playerManager, ephemeral: true });
+		if (!playerManager.current) return interaction.reply({ content: 'There is no song playing.', ephemeral: true });
 		playerManager.setRepeat(true);
-		return interaction.reply({ content: 'Repeating the current song', ephemeral: true }).catch(console.error);
+		return interaction.reply({ content: 'Repeating the current song', ephemeral: true });
 	},
 };

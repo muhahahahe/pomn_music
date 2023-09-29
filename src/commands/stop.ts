@@ -1,7 +1,7 @@
 import { ChatInputCommandInteraction, GuildMember, SlashCommandBuilder } from 'discord.js';
 import Main from '../classes/Main';
 import PlayerManager from '../classes/PlayerManager';
-import { getMusicChannelMessage } from '../utils/utils';
+import { getMusicChannelMessage, getPlayerManager } from '../utils/utils';
 
 export default {
 	data: new SlashCommandBuilder()
@@ -20,7 +20,8 @@ export default {
 		const musicMessage = await getMusicChannelMessage(interaction.guildId!, main);
 		if (musicMessage && musicMessage.channelId === interaction.channelId)
 			return interaction.reply({ content: 'Use the music player functions instead of slash commands in this channel!', ephemeral: true });
-		const playerManager = PlayerManager.getInstance(member);
+		const playerManager = getPlayerManager(member, main, musicMessage);
+		if (typeof playerManager === 'string') return interaction.reply({ content: playerManager, ephemeral: true });
 		if (!playerManager.isConnected()) return interaction.reply({ content: 'Not connected to a voice channel.', ephemeral: true });
 		const force = interaction.options.getBoolean('force') || false;
 		playerManager.stop(force);
