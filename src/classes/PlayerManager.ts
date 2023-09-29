@@ -35,6 +35,11 @@ export default class PlayerManager {
 	constructor(main: Main, guildId: string) {
 		this.main = main;
 		this.guildId = guildId;
+		if (!main.config.volume.find((v) => v.guildId === guildId)) {
+			const config = main.config;
+			config.volume.push({ guildId: guildId, volume: 30 });
+			main.setConfig(config);
+		}
 		this.state = {
 			connected: false,
 			playing: false,
