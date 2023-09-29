@@ -67,7 +67,7 @@ export default class PlayerManager {
 			stopped: true,
 			repeat: false,
 			repeatAll: false,
-			volume: 50,
+			volume: this.main.config.volume.find((v) => v.guildId === this.guildId)?.volume || 30,
 			idletime: 0,
 		};
 	}
