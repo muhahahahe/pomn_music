@@ -137,8 +137,12 @@ export default class Main {
 				playerManager.stop(false);
 			}
 
-			if (resolvedReaction.reaction.emoji.name === '🔁') {
+			if (resolvedReaction.reaction.emoji.name === '🔂') {
 				playerManager.repeat();
+			}
+
+			if (resolvedReaction.reaction.emoji.name === '🔁') {
+				playerManager.repeatAll();
 			}
 
 			if (resolvedReaction.reaction.emoji.name === '⏏️') {
