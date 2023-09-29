@@ -12,7 +12,7 @@
 	"volume": [
 		{
 			"guildId": "0",
-			"volume": "30"
+			"volume": 30
 		}
 	]
 }
