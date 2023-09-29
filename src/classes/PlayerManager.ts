@@ -36,9 +36,7 @@ export default class PlayerManager {
 		this.main = main;
 		this.guildId = guildId;
 		if (!main.config.volume.find((v) => v.guildId === guildId)) {
-			const config = main.config;
-			config.volume.push({ guildId: guildId, volume: 30 });
-			main.setConfig(config);
+			this.setConfigVolume();
 		}
 		this.state = {
 			connected: false,
@@ -335,5 +333,16 @@ export default class PlayerManager {
 
 	public setIdletime(idletime: number): void {
 		this.state.idletime = idletime;
+	}
+
+	public setConfigVolume(): void {
+		const config = this.main.config;
+		if (config.volume.find((v) => v.guildId === '0')) {
+			config.volume.find((v) => v.guildId === '0')!.guildId = this.guildId;
+			config.volume.find((v) => v.guildId === this.guildId)!.volume = 30;
+		} else {
+			config.volume.push({ guildId: this.guildId, volume: 30 });
+		}
+		this.main.setConfig(config);
 	}
 }
