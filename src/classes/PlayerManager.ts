@@ -208,6 +208,7 @@ export default class PlayerManager {
 			this.setRepeat(false);
 		} else {
 			this.setRepeat(true);
+			this.setRepeatAll(false);
 		}
 		if (this.playerEmbedHandler) {
 			this.playerEmbedHandler.updateEmbed(this.current, this.state);
@@ -221,6 +222,8 @@ export default class PlayerManager {
 			this.setRepeatAll(false);
 			this.repeatingAllQueue = [];
 		} else {
+			this.setRepeatAll(true);
+			this.setRepeat(false);
 			this.repeatingAllQueue.push(...this.queue, this.current);
 		}
 		if (this.playerEmbedHandler) {
