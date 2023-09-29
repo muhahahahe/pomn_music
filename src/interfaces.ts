@@ -58,6 +58,7 @@ interface PlayerState {
 	paused: boolean;
 	stopped: boolean;
 	repeat: boolean;
+	repeatAll: boolean;
 	volume: number;
 	idletime: number;
 }

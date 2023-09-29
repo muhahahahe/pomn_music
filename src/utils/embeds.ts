@@ -36,7 +36,15 @@ function createBasicPlayerEmbed(): EmbedBuilder {
  */
 function createEmbedDataFromTrack(track: MediaTrack, state: PlayerState): EmbedData {
 	let color = 0xdc0000;
-	if (state.repeat) color = 0x7800b4;
+	let repeat = 'Off';
+	if (state.repeat) {
+		color = 0x7800b4;
+		repeat = 'Single';
+	}
+	if (state.repeatAll) {
+		color = 0x300050;
+		repeat = 'All';
+	}
 	if (state.paused) color = 0x323232;
 	const data: EmbedData = {
 		title: track.title,
@@ -63,7 +71,7 @@ function createEmbedDataFromTrack(track: MediaTrack, state: PlayerState): EmbedD
 			},
 			{
 				name: 'Repeat:',
-				value: `${state.repeat ? 'On' : 'Off'}`,
+				value: repeat,
 				inline: true,
 			},
 			{

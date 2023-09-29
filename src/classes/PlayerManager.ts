@@ -30,6 +30,7 @@ export default class PlayerManager {
 	public audioResource: AudioResource | null = null;
 	public state: PlayerState;
 	public current: MediaTrack | null = null;
+	public repeatingAllQueue: MediaTrack[] = [];
 	public queue: MediaTrack[] = [];
 	constructor(main: Main, guildId: string) {
 		this.main = main;
@@ -40,6 +41,7 @@ export default class PlayerManager {
 			paused: false,
 			stopped: true,
 			repeat: false,
+			repeatAll: false,
 			volume: main.config.volume.find((v) => v.guildId === guildId)?.volume || 30,
 			idletime: 0,
 		};
@@ -64,6 +66,7 @@ export default class PlayerManager {
 			paused: false,
 			stopped: true,
 			repeat: false,
+			repeatAll: false,
 			volume: 50,
 			idletime: 0,
 		};
@@ -92,6 +95,7 @@ export default class PlayerManager {
 					this.setPaused(false);
 					this.setStopped(true);
 					this.setIdletime(Date.now());
+					if (this.isRepeatedAll()) return this.repeatAllPlay();
 					if (this.isRepeated()) return this.repeatPlay();
 					this.setRepeat(false);
 					this.current = null;
@@ -141,6 +145,7 @@ export default class PlayerManager {
 			console.log(track);
 			return this.play();
 		}
+
 		this.player.play(this.audioResource);
 	}
 
@@ -154,6 +159,23 @@ export default class PlayerManager {
 			console.log(track);
 			return;
 		}
+
+		this.player.play(this.audioResource);
+	}
+
+	public async repeatAllPlay(): Promise<void> {
+		if (!this.player) return;
+		const track = this.repeatingAllQueue.shift();
+		if (!track) return;
+		this.repeatingAllQueue.push(track);
+		try {
+			this.audioResource = await createResourceStream(track, this.state.volume);
+		} catch (error) {
+			console.error(error);
+			console.log(track);
+			return;
+		}
+
 		this.player.play(this.audioResource);
 	}
 
@@ -186,6 +208,20 @@ export default class PlayerManager {
 			this.setRepeat(false);
 		} else {
 			this.setRepeat(true);
+		}
+		if (this.playerEmbedHandler) {
+			this.playerEmbedHandler.updateEmbed(this.current, this.state);
+		}
+	}
+
+	public repeatAll(): void {
+		if (!this.player) return;
+		if (!this.current) return;
+		if (this.isRepeatedAll()) {
+			this.setRepeatAll(false);
+			this.repeatingAllQueue = [];
+		} else {
+			this.repeatingAllQueue.push(...this.queue, this.current);
 		}
 		if (this.playerEmbedHandler) {
 			this.playerEmbedHandler.updateEmbed(this.current, this.state);
@@ -244,6 +280,10 @@ export default class PlayerManager {
 		return this.state.repeat;
 	}
 
+	public isRepeatedAll(): boolean {
+		return this.state.repeatAll;
+	}
+
 	public getVolume(): number {
 		return this.state.volume;
 	}
@@ -275,6 +315,10 @@ export default class PlayerManager {
 
 	public setRepeat(repeat: boolean): void {
 		this.state.repeat = repeat;
+	}
+
+	public setRepeatAll(repeatAll: boolean): void {
+		this.state.repeatAll = repeatAll;
 	}
 
 	public setVolume(volume: number): void {
