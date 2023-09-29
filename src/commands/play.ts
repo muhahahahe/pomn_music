@@ -36,36 +36,28 @@ export default {
 		const trackType = await checkURL(track);
 
 		let track_info: MediaTrack | MediaTrack[] | string = '';
+		let url: string = '';
 		switch (trackType) {
 			case 'not resolvable':
 				return interaction.reply({ content: 'Media could not be resolved', ephemeral: true }).catch(console.error);
 			case 'youtube':
-				try {
-					let url = track;
-					if (!track.startsWith('https')) url = 'https://' + track;
-					const getTube = await getYoutube(url, interaction.user, member.voice.channel as VoiceChannel);
-					if (!getTube) return interaction.reply({ content: 'Could not resolve YouTube link!', ephemeral: true });
-					track_info = getTube;
-					playerManager.addTrack(track_info);
-					if (playerManager.isStopped()) playerManager.play();
-				} catch (error) {
-					return interaction.reply({ content: `An error occurred while enqueueing *${track}*`, ephemeral: true }).catch(console.error);
-				}
+				url = track;
+				if (!track.startsWith('https')) url = 'https://' + track;
+				track_info = await getYoutube(url, interaction.user, member.voice.channel as VoiceChannel);
+				if (typeof track_info === 'string') return interaction.reply({ content: track_info, ephemeral: true });
+				playerManager.addTrack(track_info);
+				if (playerManager.isStopped()) playerManager.play();
 
 				break;
 			case 'youtube_playlist':
-				try {
-					let url = track;
-					if (!track.startsWith('https')) url = 'https://' + track;
-					track_info = await getYoutubePlaylist(url, interaction.user, member.voice.channel as VoiceChannel);
-					if (typeof track_info === 'string') return interaction.reply({ content: track_info, ephemeral: true });
-					track_info.forEach((track) => {
-						playerManager.addTrack(track);
-					});
-					if (playerManager.isStopped()) playerManager.play();
-				} catch (error) {
-					return interaction.reply({ content: `An error occurred while enqueueing *${track}*`, ephemeral: true }).catch(console.error);
-				}
+				url = track;
+				if (!track.startsWith('https')) url = 'https://' + track;
+				track_info = await getYoutubePlaylist(url, interaction.user, member.voice.channel as VoiceChannel);
+				if (typeof track_info === 'string') return interaction.reply({ content: track_info, ephemeral: true });
+				track_info.forEach((track) => {
+					playerManager.addTrack(track);
+				});
+				if (playerManager.isStopped()) playerManager.play();
 
 				break;
 			case 'soundcloud':
@@ -85,22 +77,16 @@ export default {
 
 				break;
 			case 'media':
-				//handle media
-				try {
-					track_info = await getMediaFile(track, interaction.user, member.voice.channel as VoiceChannel);
-					playerManager.addTrack(track_info);
-					if (playerManager.isStopped()) playerManager.play();
-				} catch (error) {
-					return interaction.reply({ content: `An error occurred while enqueueing *${track}*`, ephemeral: true }).catch(console.error);
-				}
+				track_info = await getMediaFile(track, interaction.user, member.voice.channel as VoiceChannel);
+				playerManager.addTrack(track_info);
+				if (playerManager.isStopped()) playerManager.play();
+
+				break;
 			default:
-				try {
-					track_info = await searchYoutube(track, interaction.user, member.voice.channel as VoiceChannel);
-					playerManager.addTrack(track_info);
-					if (playerManager.isStopped()) playerManager.play();
-				} catch (error) {
-					return interaction.reply({ content: `An error occurred while searching for *${track}*`, ephemeral: true }).catch(console.error);
-				}
+				track_info = await searchYoutube(track, interaction.user, member.voice.channel as VoiceChannel);
+				if (typeof track_info === 'string') return interaction.reply({ content: track_info, ephemeral: true });
+				playerManager.addTrack(track_info);
+				if (playerManager.isStopped()) playerManager.play();
 
 				break;
 		}

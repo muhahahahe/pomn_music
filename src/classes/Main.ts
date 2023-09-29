@@ -74,6 +74,7 @@ export default class Main {
 				if (message.content.startsWith('+')) {
 					const search = message.content.slice(1);
 					const track = await searchYoutube(search, member.user, member.voice.channel as VoiceChannel);
+					if (typeof track === 'string') return;
 					playerManager.addTrack(track);
 					if (playerManager.isStopped()) playerManager.play();
 				}
@@ -88,7 +89,7 @@ export default class Main {
 				let url = message.content;
 				if (!message.content.startsWith('https')) url = 'https://' + url;
 				const track = await getYoutube(url, member.user, member.voice.channel as VoiceChannel);
-				if (!track) return;
+				if (typeof track === 'string') return;
 				playerManager.addTrack(track);
 				if (playerManager.isStopped()) playerManager.play();
 			}
@@ -155,8 +156,6 @@ export default class Main {
 			if (oldState.channelId === newState.channelId) return;
 			if (newState.member?.user.bot) return;
 			if (oldState.channelId) {
-				//handle leave
-				//get all users in the vc besides the bot
 				const members = oldState.channel!.members.filter((m) => !m.user.bot);
 				if (members.size === 0) {
 					PlayerManager.getInstance(oldState.member!).destroyVoiceConnection();

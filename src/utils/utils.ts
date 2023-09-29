@@ -13,7 +13,7 @@ import {
 	VoiceChannel,
 } from 'discord.js';
 import { AudioPlayer, AudioResource, NoSubscriberBehavior, createAudioPlayer, createAudioResource, demuxProbe } from '@discordjs/voice';
-import { InfoData, playlist_info, search, soundcloud, stream, video_basic_info } from 'play-dl';
+import { InfoData, SoundCloud, YouTubeVideo, playlist_info, search, soundcloud, stream, video_basic_info } from 'play-dl';
 import axios, { AxiosResponse } from 'axios';
 import { IAudioMetadata, parseStream } from 'music-metadata';
 import path from 'path';
@@ -36,11 +36,14 @@ const playableTypes = [
 	'video/x-msvideo',
 	'video/3gpp',
 ];
+
 const basicMusicChannelData = {
 	guildId: '0',
 	channelId: '0',
 	messageId: '0',
 };
+
+const defaultThumbnail = 'https://www.dropbox.com/scl/fi/fmbn0x9r4uwhposciz9n5/black_thumbnail.png?rlkey=uaen00ozi5rk483e2hzsxjovi&dl=1';
 
 /**
  * Returns all commands in from the commands folder.
@@ -298,22 +301,28 @@ async function checkURL(url: string): Promise<string> {
  * @param {string} query - Search string for the YouTube query.
  * @returns {Promise<MediaTrack>} - Returns a promise with an array of YouTubeVideo objects.
  */
-async function searchYoutube(query: string, user: User, channel: VoiceChannel): Promise<MediaTrack> {
-	const result = (
-		await search(query, {
-			limit: 1,
-			source: {
-				youtube: 'video',
-			},
-		})
-	)[0];
+async function searchYoutube(query: string, user: User, channel: VoiceChannel): Promise<MediaTrack | string> {
+	let result: YouTubeVideo | null = null;
+	try {
+		result = (
+			await search(query, {
+				limit: 1,
+				source: {
+					youtube: 'video',
+				},
+			})
+		)[0];
+	} catch (error) {
+		return 'No results found.';
+	}
+
 	const data: MediaTrack = {
 		requester: user,
 		voiceChannel: channel,
 		title: result.title || 'unknown',
 		durationInSec: result.durationInSec || 0,
 		url: result.url,
-		thumbnail: result.thumbnails[0].url,
+		thumbnail: result.thumbnails[0].url || defaultThumbnail,
 		type: 'youtube',
 	};
 	return data;
@@ -325,63 +334,62 @@ async function searchYoutube(query: string, user: User, channel: VoiceChannel): 
  * @param url - URL or ID of the YouTube video.
  * @param user - The discord user who requested the track.
  * @param channel - The discord voice channel the user is in.
- * @returns {Promise<MediaTrack>} - Returns a promise with a MediaTrack object.
+ * @returns {Promise<MediaTrack | false>} - Returns a promise with a MediaTrack object.
  */
-// async function getYoutube(url: string, user: User, channel: VoiceChannel): Promise<MediaTrack | false> {
-// 	let result: InfoData | undefined = undefined;
-// 	try {
-// 		result = await video_basic_info(url);
-// 	} catch (error) {
-// 		console.error(error);
-// 	}
-// 	if (!result) return false;
-// 	const data: MediaTrack = {
-// 		requester: user,
-// 		voiceChannel: channel,
-// 		title: result.video_details?.title || 'unknown',
-// 		durationInSec: result.video_details?.durationInSec || 0,
-// 		url: result.video_details?.url,
-// 		thumbnail: result.video_details?.thumbnails[0].url,
-// 		type: 'youtube',
-// 	};
-// 	return data;
-// }
-async function getYoutube(url: string, user: User, channel: VoiceChannel): Promise<MediaTrack | false> {
-	const videoId = url.split('v=')[1];
-	const apiKey = process.env.YOUTUBE_API_KEY;
-	const apiUrl = `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&key=${apiKey}&part=snippet,contentDetails`;
-
+async function getYoutube(url: string, user: User, channel: VoiceChannel): Promise<MediaTrack | string> {
+	let result: InfoData | null = null;
 	try {
-		const response = await axios.get(apiUrl);
-		const items = response.data.items;
-		if (!items || items.length === 0) return false;
-
-		const details = items[0];
-		const data: MediaTrack = {
-			requester: user,
-			voiceChannel: channel,
-			title: details.snippet.title,
-			durationInSec: convertDurationToSec(details.contentDetails.duration),
-			url: `https://www.youtube.com/watch?v=${details.id}`,
-			thumbnail: details.snippet.thumbnails.default.url,
-			type: 'youtube',
-		};
-		return data;
+		result = await video_basic_info(url);
 	} catch (error) {
 		console.error(error);
-		return false;
+		return 'Error while fetching YouTube.';
 	}
+	const data: MediaTrack = {
+		requester: user,
+		voiceChannel: channel,
+		title: result.video_details.title || 'unknown',
+		durationInSec: result.video_details.durationInSec || 0,
+		url: result.video_details.url,
+		thumbnail: result.video_details.thumbnails[0].url || defaultThumbnail,
+		type: 'youtube',
+	};
+	return data;
 }
+// async function getYoutube(url: string, user: User, channel: VoiceChannel): Promise<MediaTrack | false> {
+// 	const videoId = url.split('v=')[1];
+// 	const apiKey = process.env.YOUTUBE_API_KEY;
+// 	const apiUrl = `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&key=${apiKey}&part=snippet,contentDetails`;
 
-function convertDurationToSec(duration: string): number {
-	if (!duration) return 0;
-	const match = duration.match(/PT(\d+H)?(\d+M)?(\d+S)?/);
-	if (!match) return 0;
-	const hours = (parseInt(match[1]) || 0) * 3600;
-	const minutes = (parseInt(match[2]) || 0) * 60;
-	const seconds = parseInt(match[3]) || 0;
-	return hours + minutes + seconds;
-}
+// 	try {
+// 		const response = await axios.get(apiUrl);
+// 		const items = response.data.items;
+// 		if (!items || items.length === 0) return false;
+
+// 		const details = items[0];
+// 		const data: MediaTrack = {
+// 			requester: user,
+// 			voiceChannel: channel,
+// 			title: details.snippet.title,
+// 			durationInSec: convertDurationToSec(details.contentDetails.duration),
+// 			url: `https://www.youtube.com/watch?v=${details.id}`,
+// 			thumbnail: details.snippet.thumbnails.default.url,
+// 			type: 'youtube',
+// 		};
+// 		return data;
+// 	} catch (error) {
+// 		console.error(error);
+// 		return false;
+// 	}
+// }
+// function convertDurationToSec(duration: string): number {
+// 	if (!duration) return 0;
+// 	const match = duration.match(/PT(\d+H)?(\d+M)?(\d+S)?/);
+// 	if (!match) return 0;
+// 	const hours = (parseInt(match[1]) || 0) * 3600;
+// 	const minutes = (parseInt(match[2]) || 0) * 60;
+// 	const seconds = parseInt(match[3]) || 0;
+// 	return hours + minutes + seconds;
+// }
 
 /**
  * Gets an array of MediaTrack objects from a YouTube playlist URL.
@@ -389,63 +397,63 @@ function convertDurationToSec(duration: string): number {
  * @param url - URL to the YouTube playlist.
  * @param user - The discord user who requested the playlist.
  * @param channel - The discord voice channel the user is in.
- * @returns {Promise<MediaTrack[]>} - Returns a promise with an array of MediaTrack objects.
+ * @returns {Promise<MediaTrack[] | string>} - Returns a promise with an array of MediaTrack objects.
  */
-// async function getYoutubePlaylist(url: string, user: User, channel: VoiceChannel): Promise<MediaTrack[] | string> {
-// 	let data: MediaTrack[] = [];
-// 	const singleTrack = url.split('&list=')[0];
-// 	const track = await getYoutube(singleTrack, user, channel);
-// 	if (!track) return 'Playlist is empty.';
-// 	data.push(track);
-// 	// const result = await playlist_info(url, { incomplete: true });
-// 	// const videos = await result.all_videos();
-// 	// videos.forEach((video) => {
-// 	// 	data.push({
-// 	// 		requester: user,
-// 	// 		voiceChannel: channel,
-// 	// 		title: video.title || 'unknown',
-// 	// 		durationInSec: video.durationInSec || 0,
-// 	// 		url: video.url,
-// 	// 		thumbnail: video.thumbnails[0].url,
-// 	// 		type: 'youtube',
-// 	// 	});
-// 	// });
-// 	if (data.length === 0) {
-// 		return 'Playlist is empty.';
-// 	}
-// 	return data;
-// }
 async function getYoutubePlaylist(url: string, user: User, channel: VoiceChannel): Promise<MediaTrack[] | string> {
-	const playlistId = url.split('list=')[1];
-	const apiKey = process.env.YOUTUBE_API_KEY;
-	let apiUrl:
-		| string
-		| null = `https://www.googleapis.com/youtube/v3/playlistItems?playlistId=${playlistId}&key=${apiKey}&part=snippet,contentDetails&maxResults=50`;
-	let playlistItems: MediaTrack[] = [];
-
+	let data: MediaTrack[] = [];
 	try {
-		while (apiUrl) {
-			const response: AxiosResponse = await axios.get(apiUrl);
-			const items: YoutubeApiItem[] = response.data.items;
-			if (!items || items.length === 0) return 'Playlist is empty.';
-
-			for (const item of items) {
-				const videoUrl = `https://www.youtube.com/watch?v=${item.snippet.resourceId.videoId}`;
-				const videoData = await getYoutube(videoUrl, user, channel);
-				if (videoData) {
-					playlistItems.push(videoData);
-				}
-			}
-
-			apiUrl = response.data.nextPageToken ? `${apiUrl}&pageToken=${response.data.nextPageToken}` : null;
-		}
-
-		return playlistItems;
+		const result = await playlist_info(url, { incomplete: true });
+		const videos = await result.all_videos();
+		videos.forEach((video) => {
+			data.push({
+				requester: user,
+				voiceChannel: channel,
+				title: video.title || 'unknown',
+				durationInSec: video.durationInSec || 0,
+				url: video.url,
+				thumbnail: video.thumbnails[0].url || defaultThumbnail,
+				type: 'youtube',
+			});
+		});
 	} catch (error) {
-		console.error(error);
-		return 'Error fetching playlist.';
+		return 'Error while fetching YouTube playlist.';
 	}
+	if (data.length === 0) {
+		return 'Playlist is empty.';
+	}
+	return data;
 }
+// async function getYoutubePlaylist(url: string, user: User, channel: VoiceChannel): Promise<MediaTrack[] | string> {
+// 	const playlistId = url.split('list=')[1];
+// 	const apiKey = process.env.YOUTUBE_API_KEY;
+// 	let apiUrl:
+// 		| string
+// 		| null = `https://www.googleapis.com/youtube/v3/playlistItems?playlistId=${playlistId}&key=${apiKey}&part=snippet,contentDetails&maxResults=50`;
+// 	let playlistItems: MediaTrack[] = [];
+
+// 	try {
+// 		while (apiUrl) {
+// 			const response: AxiosResponse = await axios.get(apiUrl);
+// 			const items: YoutubeApiItem[] = response.data.items;
+// 			if (!items || items.length === 0) return 'Playlist is empty.';
+
+// 			for (const item of items) {
+// 				const videoUrl = `https://www.youtube.com/watch?v=${item.snippet.resourceId.videoId}`;
+// 				const videoData = await getYoutube(videoUrl, user, channel);
+// 				if (videoData) {
+// 					playlistItems.push(videoData);
+// 				}
+// 			}
+
+// 			apiUrl = response.data.nextPageToken ? `${apiUrl}&pageToken=${response.data.nextPageToken}` : null;
+// 		}
+
+// 		return playlistItems;
+// 	} catch (error) {
+// 		console.error(error);
+// 		return 'Error fetching playlist.';
+// 	}
+// }
 
 /**
  * Gets a MediaTrack from a Soundcloud URL.
@@ -453,19 +461,23 @@ async function getYoutubePlaylist(url: string, user: User, channel: VoiceChannel
  * @param {string} url - Thumbail URL of the Soundcloud track.
  * @param {User} user - The discord user who requested the track.
  * @param {VoiceChannel} channel - The discord voice channel the user is in.
- * @returns {Promise<MediaTrack>} - Returns a promise with a MediaTrack object.
+ * @returns {Promise<MediaTrack | string>} - Returns a promise with a MediaTrack object.
  */
-async function getSoundcloud(url: string, user: User, channel: VoiceChannel): Promise<MediaTrack> {
-	const result = await soundcloud(url);
+async function getSoundcloud(url: string, user: User, channel: VoiceChannel): Promise<MediaTrack | string> {
+	let result: SoundCloud | null = null;
+	try {
+		result = await soundcloud(url);
+	} catch (error) {
+		return 'Error while fetching Soundcloud track.';
+	}
+
 	const data: MediaTrack = {
 		requester: user,
 		voiceChannel: channel,
 		title: result.name || 'unknown',
 		durationInSec: result.durationInSec || 0,
 		url: result.url,
-		thumbnail:
-			result.user.thumbnail ||
-			'https://www.dropbox.com/scl/fi/fmbn0x9r4uwhposciz9n5/black_thumbnail.png?rlkey=uaen00ozi5rk483e2hzsxjovi&dl=1',
+		thumbnail: result.user.thumbnail || defaultThumbnail,
 		type: 'soundcloud',
 	};
 	return data;
@@ -487,12 +499,11 @@ async function getMediaFile(url: string, user: User, channel: VoiceChannel): Pro
 		url,
 		title: metadata.common.title || 'unknown',
 		durationInSec: metadata.format.duration || 0,
-		thumbnail: 'https://www.dropbox.com/scl/fi/fmbn0x9r4uwhposciz9n5/black_thumbnail.png?rlkey=uaen00ozi5rk483e2hzsxjovi&dl=1',
+		thumbnail: defaultThumbnail,
 		type: 'media',
 	};
 	return mediaTrack;
 }
-
 async function getMediaInfo(url: string): Promise<IAudioMetadata> {
 	const metadata = await parseStream((await axios.get(url, { responseType: 'stream' })).data);
 	return metadata;
