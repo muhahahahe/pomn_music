@@ -8,5 +8,11 @@
 			"channelId": "0",
 			"messageId": "0"
 		}
+	],
+	"volume": [
+		{
+			"guildId": "0",
+			"volume": "30"
+		}
 	]
 }

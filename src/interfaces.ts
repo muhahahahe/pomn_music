@@ -6,12 +6,18 @@ interface Config {
 	player_embed: boolean;
 	reg_commands: boolean;
 	music_channels: MusicChannelData[];
+	volume: VolumeData[];
 }
 
 interface MusicChannelData {
 	guildId: string;
 	channelId: string;
 	messageId: string;
+}
+
+interface VolumeData {
+	guildId: string;
+	volume: number;
 }
 
 interface ResolvedReaction {
@@ -69,4 +75,4 @@ interface Command {
 	execute: (interaction: any, main: Main) => {};
 }
 
-export { Config, MusicChannelData, ResolvedReaction, MediaTrack, YoutubeApiItem, PlayerState, CommandHelp, Command };
+export { Config, MusicChannelData, VolumeData, ResolvedReaction, MediaTrack, YoutubeApiItem, PlayerState, CommandHelp, Command };
