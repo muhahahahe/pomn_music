@@ -23,6 +23,7 @@ export default class PlayerManager {
 		return PlayerManager.instances.get(guildId)!;
 	}
 	public main: Main;
+	public guildId: string;
 	public playerEmbedHandler: PlayerEmbedHandler | null = null;
 	public connection: VoiceConnection | null = null;
 	public player: AudioPlayer | null = null;
@@ -32,6 +33,7 @@ export default class PlayerManager {
 	public queue: MediaTrack[] = [];
 	constructor(main: Main, guildId: string) {
 		this.main = main;
+		this.guildId = guildId;
 		this.state = {
 			connected: false,
 			playing: false,
@@ -191,6 +193,9 @@ export default class PlayerManager {
 	}
 
 	public volume(number: number): void {
+		const config = this.main.config;
+		config.volume.find((v) => v.guildId === this.guildId)!.volume = number;
+		this.main.setConfig(config);
 		if (!this.audioResource) return;
 		if (this.audioResource.volume) {
 			this.audioResource.volume.setVolume(number / 100);
