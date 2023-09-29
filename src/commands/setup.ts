@@ -30,8 +30,7 @@ export default {
 		usage: '/setup create [channel]\n/setup remove',
 	},
 	execute: async (interaction: ChatInputCommandInteraction, main: Main) => {
-		if (!main.config.player_embed)
-			return interaction.reply({ content: 'The music player embed is disabled', ephemeral: true }).catch(console.error);
+		if (!main.config.player_embed) return interaction.reply({ content: 'The music player embed is disabled', ephemeral: true });
 
 		if (interaction.options.getSubcommand() === 'create') {
 			const channel = interaction.options.getChannel('channel') || interaction.channel;
@@ -60,14 +59,14 @@ export default {
 					} else if (confirmation.customId === 'cancel') {
 						await confirmation.update({ content: 'Setup cancelled', components: [] });
 						setTimeout(() => {
-							confirmation.deleteReply();
+							confirmation.deleteReply().catch(console.error);
 						}, 5000);
 						return;
 					}
 				} catch (error) {
 					interaction.editReply({ content: 'Confirmation not received within 1 minute, cancelling', components: [] });
 					setTimeout(() => {
-						interaction.deleteReply();
+						interaction.deleteReply().catch(console.error);
 					}, 5000);
 				}
 			}
@@ -81,16 +80,16 @@ export default {
 					messageId: message.id,
 				};
 				const config = updateMusicChannelConfig(new_music_channel, current_music_message ? true : false);
-				if (!config) return interaction.editReply({ content: 'reading config failed' }).catch(console.error);
+				if (!config) return interaction.editReply({ content: 'reading config failed' });
 				main.setConfig(config);
 			} catch (error) {
 				console.error(error);
-				return interaction.editReply({ content: 'Creating the player failed!' }).catch(console.error);
+				return interaction.editReply({ content: 'Creating the player failed!' });
 			}
 
-			interaction.editReply({ content: 'Setup complete!' }).catch(console.error);
+			interaction.editReply({ content: 'Setup complete!' });
 			setTimeout(() => {
-				interaction.deleteReply();
+				interaction.deleteReply().catch(console.error);
 			}, 5000);
 		} else {
 			const current_music_message = await getMusicChannelMessage(interaction.guildId!, main);
@@ -114,7 +113,7 @@ export default {
 				} else if (confirmation.customId === 'cancel') {
 					await confirmation.update({ content: 'Setup cancelled', components: [] });
 					setTimeout(() => {
-						confirmation.deleteReply();
+						confirmation.deleteReply().catch(console.error);
 					}, 5000);
 
 					return;
@@ -122,25 +121,25 @@ export default {
 			} catch (error) {
 				interaction.editReply({ content: 'Confirmation not received within 1 minute, cancelling', components: [] });
 				setTimeout(() => {
-					interaction.deleteReply();
+					interaction.deleteReply().catch(console.error);
 				}, 5000);
 			}
 
 			try {
 				const config = removeMusicChannelConfig(interaction.guildId!);
 
-				if (!config) return interaction.editReply({ content: 'reading config failed' }).catch(console.error);
+				if (!config) return interaction.editReply({ content: 'reading config failed' });
 
 				main.setConfig(config);
 			} catch (error) {
 				console.error(error);
 
-				return interaction.editReply({ content: 'Removing the player failed!' }).catch(console.error);
+				return interaction.editReply({ content: 'Removing the player failed!' });
 			}
 
-			interaction.editReply({ content: 'Removing complete!' }).catch(console.error);
+			interaction.editReply({ content: 'Removing complete!' });
 			setTimeout(() => {
-				interaction.deleteReply();
+				interaction.deleteReply().catch(console.error);
 			}, 5000);
 		}
 		return;
