@@ -22,7 +22,20 @@ import { Command, Config, MediaTrack, MusicChannelData, ResolvedReaction, Youtub
 import PlayerManager from '../classes/PlayerManager';
 import Main from '../classes/Main';
 
-const playableTypes = ['audio/mpeg', 'audio/mp4', 'audio/webm', 'audio/ogg', 'video/mpeg', 'video/mp4', 'video/webm'];
+const playableTypes = [
+	'audio/mpeg',
+	'audio/mp4',
+	'audio/ogg',
+	'audio/opus',
+	'audio/wav',
+	'video/mpeg',
+	'video/mp4',
+	'video/ogg',
+	'video/quicktime',
+	'video/webm',
+	'video/x-msvideo',
+	'video/3gpp',
+];
 const basicMusicChannelData = {
 	guildId: '0',
 	channelId: '0',
