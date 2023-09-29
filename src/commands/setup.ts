@@ -93,14 +93,12 @@ export default {
 			}, 5000);
 		} else {
 			const current_music_message = await getMusicChannelMessage(interaction.guildId!, main);
-			if (!current_music_message) {
-				return interaction.reply({ content: 'The music channel is not set', ephemeral: true });
-			}
-			await interaction.deferReply();
+			if (!current_music_message) return interaction.reply({ content: 'The music channel is not set', ephemeral: true });
 			const confirm = getActionRow(confirm_components());
-			const reply = await interaction.editReply({
+			const reply = await interaction.reply({
 				content: `Do you want to remove the music player?`,
 				components: [confirm],
+				ephemeral: true,
 			});
 
 			try {
@@ -110,7 +108,25 @@ export default {
 				});
 				if (confirmation.customId === 'confirm') {
 					deleteMessage(current_music_message);
-				} else if (confirmation.customId === 'cancel') {
+
+					try {
+						const config = removeMusicChannelConfig(interaction.guildId!);
+
+						if (!config) return interaction.editReply({ content: 'reading config failed' });
+
+						main.setConfig(config);
+
+						interaction.editReply({ content: 'Removing complete!' });
+						setTimeout(() => {
+							interaction.deleteReply().catch(console.error);
+						}, 5000);
+					} catch (error) {
+						console.error(error);
+
+						return interaction.editReply({ content: 'Removing the player failed!' });
+					}
+				}
+				if (confirmation.customId === 'cancel') {
 					await confirmation.update({ content: 'Setup cancelled', components: [] });
 					setTimeout(() => {
 						confirmation.deleteReply().catch(console.error);
@@ -124,24 +140,6 @@ export default {
 					interaction.deleteReply().catch(console.error);
 				}, 5000);
 			}
-
-			try {
-				const config = removeMusicChannelConfig(interaction.guildId!);
-
-				if (!config) return interaction.editReply({ content: 'reading config failed' });
-
-				main.setConfig(config);
-			} catch (error) {
-				console.error(error);
-
-				return interaction.editReply({ content: 'Removing the player failed!' });
-			}
-
-			interaction.editReply({ content: 'Removing complete!' });
-			setTimeout(() => {
-				interaction.deleteReply().catch(console.error);
-			}, 5000);
 		}
-		return;
 	},
 };
