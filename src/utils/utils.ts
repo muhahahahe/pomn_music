@@ -497,15 +497,18 @@ async function getMediaFile(url: string, user: User, channel: VoiceChannel): Pro
 		requester: user,
 		voiceChannel: channel,
 		url,
-		title: metadata.common.title || 'unknown',
-		durationInSec: metadata.format.duration || 0,
+		title: metadata?.common.title || 'unknown',
+		durationInSec: metadata?.format.duration || 0,
 		thumbnail: defaultThumbnail,
 		type: 'media',
 	};
 	return mediaTrack;
 }
-async function getMediaInfo(url: string): Promise<IAudioMetadata> {
-	const metadata = await parseStream((await axios.get(url, { responseType: 'stream' })).data);
+async function getMediaInfo(url: string): Promise<IAudioMetadata | null> {
+	let metadata: IAudioMetadata | null = null;
+	try {
+		metadata = await parseStream((await axios.get(url, { responseType: 'stream' })).data);
+	} catch (error) {}
 	return metadata;
 }
 

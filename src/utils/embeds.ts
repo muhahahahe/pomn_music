@@ -47,7 +47,7 @@ function createEmbedDataFromTrack(track: MediaTrack, state: PlayerState): EmbedD
 	}
 	if (state.paused) color = 0x323232;
 	const data: EmbedData = {
-		title: track.title,
+		title: track.title ? track.title : 'unknown',
 		fields: [
 			{
 				name: 'Requested by:',
