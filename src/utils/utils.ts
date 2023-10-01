@@ -299,7 +299,7 @@ async function checkURL(url: string): Promise<string> {
  * Searches for the first result of the provided search string on YouTube.
  *
  * @param {string} query - Search string for the YouTube query.
- * @returns {Promise<MediaTrack>} - Returns a promise with an array of YouTubeVideo objects.
+ * @returns {Promise<MediaTrack | string>} - Returns a promise with a MediaTrack or string.
  */
 async function searchYoutube(query: string, user: User, channel: VoiceChannel): Promise<MediaTrack | string> {
 	let result: YouTubeVideo | null = null;
@@ -315,7 +315,10 @@ async function searchYoutube(query: string, user: User, channel: VoiceChannel): 
 	} catch (error) {
 		return 'No results found.';
 	}
-
+	if (!result) {
+		console.log(`Search that returned undefined: ${query}`);
+		return 'No results found.';
+	}
 	const data: MediaTrack = {
 		requester: user,
 		voiceChannel: channel,
