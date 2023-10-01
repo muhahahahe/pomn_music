@@ -300,7 +300,6 @@ async function checkURL(url: string): Promise<string> {
  *
  * @param {string} query - Search string for the YouTube query.
  * @returns {Promise<MediaTrack | string>} - Returns a promise with a MediaTrack or string.
- * @returns {Promise<MediaTrack | string>} - Returns a promise with a MediaTrack or string.
  */
 async function searchYoutube(query: string, user: User, channel: VoiceChannel): Promise<MediaTrack | string> {
 	let result: YouTubeVideo | null = null;
