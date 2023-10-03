@@ -75,9 +75,13 @@ export default class Main {
 				if (message.content.startsWith('+')) {
 					const search = message.content.slice(1);
 					const track = await searchYoutube(search, member.user, member.voice.channel as VoiceChannel);
-					if (typeof track === 'string') return;
+					if (typeof track === 'string') {
+						if (playerManager.playerEmbedHandler) playerManager.playerEmbedHandler.info(track);
+						return;
+					}
 					playerManager.addTrack(track);
 					if (playerManager.isStopped()) playerManager.play();
+					if (playerManager.playerEmbedHandler) playerManager.playerEmbedHandler.info(`Added *${track.title}*`);
 				}
 				if (message.content.startsWith('v') || message.content.startsWith('vol') || message.content.startsWith('volume')) {
 					const volume = Number(message.content.replace(/^\D+/g, '').trim());
@@ -90,20 +94,28 @@ export default class Main {
 				let url = message.content;
 				if (!message.content.startsWith('https')) url = 'https://' + url;
 				const track = await getYoutube(url, member.user, member.voice.channel as VoiceChannel);
-				if (typeof track === 'string') return;
+				if (typeof track === 'string') {
+					if (playerManager.playerEmbedHandler) playerManager.playerEmbedHandler.info(track);
+					return;
+				}
 				playerManager.addTrack(track);
 				if (playerManager.isStopped()) playerManager.play();
+				if (playerManager.playerEmbedHandler) playerManager.playerEmbedHandler.info(`Added *${track.title}*`);
 			}
 
 			if (check === 'youtube_playlist') {
 				let url = message.content;
 				if (!message.content.startsWith('https')) url = 'https://' + url;
 				const tracks = await getYoutubePlaylist(url, member.user, member.voice.channel as VoiceChannel);
-				if (typeof tracks === 'string') return;
+				if (typeof tracks === 'string') {
+					if (playerManager.playerEmbedHandler) playerManager.playerEmbedHandler.info(tracks);
+					return;
+				}
 				tracks.forEach((track) => {
 					playerManager.addTrack(track);
 				});
 				if (playerManager.isStopped()) playerManager.play();
+				if (playerManager.playerEmbedHandler) playerManager.playerEmbedHandler.info(`Added *${tracks.length} tracks*`);
 			}
 
 			if (check === 'media') {

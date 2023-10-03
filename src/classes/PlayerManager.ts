@@ -112,18 +112,11 @@ export default class PlayerManager {
 					this.setPaused(false);
 					this.setStopped(false);
 					this.setIdletime(0);
-					if (this.playerEmbedHandler) {
-						this.playerEmbedHandler.updateEmbed(this.current!, this.state);
-					}
 				}
 				if (newState.status === AudioPlayerStatus.Paused) {
 					this.setPlaying(false);
 					this.setPaused(true);
-					this.setStopped(false);
 					this.setIdletime(Date.now());
-					if (this.playerEmbedHandler) {
-						this.playerEmbedHandler.updateEmbed(this.current!, this.state);
-					}
 				}
 			});
 		}
@@ -193,6 +186,7 @@ export default class PlayerManager {
 		}
 		if (this.playerEmbedHandler) {
 			this.playerEmbedHandler.updateEmbed(this.current, this.state);
+			this.playerEmbedHandler.info(this.isPaused() ? 'Paused playback' : 'Resumed playback');
 		}
 	}
 
@@ -246,6 +240,7 @@ export default class PlayerManager {
 		}
 		if (this.playerEmbedHandler && this.current) {
 			this.playerEmbedHandler.updateEmbed(this.current, this.state);
+			this.playerEmbedHandler.info(`Volume set to ${number}`);
 		}
 	}
 

@@ -18,4 +18,10 @@ export default class PlayerEmbedHandler {
 		this.current = createBasicPlayerEmbed();
 		this.message.edit({ embeds: [this.current] });
 	}
+
+	public info(infoText: string): void {
+		if (!this.current) return;
+		const embed = this.current.setFooter({ text: infoText });
+		this.message.edit({ embeds: [embed] });
+	}
 }
