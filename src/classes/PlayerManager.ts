@@ -112,6 +112,7 @@ export default class PlayerManager {
 					this.setPaused(false);
 					this.setStopped(false);
 					this.setIdletime(0);
+					if (this.playerEmbedHandler) this.playerEmbedHandler.updateEmbed(this.current!, this.state);
 				}
 				if (newState.status === AudioPlayerStatus.Paused) {
 					this.setPlaying(false);
