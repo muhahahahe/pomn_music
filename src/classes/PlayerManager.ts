@@ -170,6 +170,7 @@ export default class PlayerManager {
 		if (!this.player) return;
 		const track = this.repeatingAllQueue.shift();
 		if (!track) return;
+		this.current = track;
 		this.repeatingAllQueue.push(track);
 		try {
 			this.audioResource = await createResourceStream(track, this.state.volume);
