@@ -23,7 +23,10 @@ export default class QueueEmbedHandler {
 	public async createEmbed(): Promise<void> {
 		this.lastEmbed = createQueueEmbed(this.playerManager.current!, this.playerManager.queue, this.page);
 		const pageComponents = getActionRow(page_components());
-		const reply = await this.interaction.reply({ embeds: [this.lastEmbed], components: [pageComponents] });
+		const reply = await this.interaction.reply({
+			embeds: [this.lastEmbed],
+			components: this.playerManager.queue.length > 10 ? [pageComponents] : [],
+		});
 
 		this.listenForNavigation(reply, pageComponents);
 	}
@@ -46,7 +49,7 @@ export default class QueueEmbedHandler {
 					this.page = max;
 				}
 				this.lastEmbed = createQueueEmbed(this.playerManager.current!, this.playerManager.queue, this.page);
-				await navigation.update({ embeds: [this.lastEmbed], components: [pageComponents] });
+				await navigation.update({ embeds: [this.lastEmbed], components: this.playerManager.queue.length > 10 ? [pageComponents] : [] });
 				this.listenForNavigation(reply, pageComponents);
 			}
 			if (navigation.customId === 'next') {
@@ -56,7 +59,7 @@ export default class QueueEmbedHandler {
 					this.page = 0;
 				}
 				this.lastEmbed = createQueueEmbed(this.playerManager.current!, this.playerManager.queue, this.page);
-				await navigation.update({ embeds: [this.lastEmbed], components: [pageComponents] });
+				await navigation.update({ embeds: [this.lastEmbed], components: this.playerManager.queue.length > 10 ? [pageComponents] : [] });
 				this.listenForNavigation(reply, pageComponents);
 			}
 		} catch (error) {
