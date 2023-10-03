@@ -1,7 +1,5 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import Main from '../classes/Main';
-import { Command } from '../interfaces';
-import { getCommands } from '../utils/utils';
 import HelpEmbedHandler from '../classes/HelpEmbedHandler';
 
 const commands = ['Music Player', 'Pause', 'Play', 'Queue', 'Repeat', 'Skip', 'Stop', 'Volume', 'Setup'];
@@ -15,7 +13,6 @@ export default {
 				.setDescription('Command to get help on')
 				.setRequired(false)
 				.addChoices(
-					{ name: 'Music Player', value: 'Music Player' },
 					...commands.map((c) => {
 						return { name: c, value: c };
 					})
