@@ -14,7 +14,7 @@ import {
 } from 'discord.js';
 import { AudioPlayer, AudioResource, NoSubscriberBehavior, createAudioPlayer, createAudioResource, demuxProbe } from '@discordjs/voice';
 import { InfoData, SoundCloud, YouTubeVideo, playlist_info, search, soundcloud, stream, video_basic_info } from 'play-dl';
-import axios, { AxiosResponse } from 'axios';
+import axios from 'axios';
 import { IAudioMetadata, parseStream } from 'music-metadata';
 import path from 'path';
 import fs from 'fs';
