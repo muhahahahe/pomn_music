@@ -1,4 +1,4 @@
-import { EmbedAssetData, EmbedBuilder, EmbedData } from 'discord.js';
+import { APIEmbedField, EmbedAssetData, EmbedBuilder, EmbedData } from 'discord.js';
 import { Command, MediaTrack, PlayerState } from '../interfaces';
 import { secondsToTime } from './utils';
 
@@ -32,9 +32,10 @@ function createBasicPlayerEmbed(): EmbedBuilder {
  *
  * @param {MediaTrack} track - The MediaTrack to create the embed data from.
  * @param {PlayerState} state - The PlayerState of the player manager.
+ * @param {MediaTrack} [next] - The next track if available.
  * @returns {EmbedData} - Returns the embed data.
  */
-function createEmbedDataFromTrack(track: MediaTrack, state: PlayerState): EmbedData {
+function createEmbedDataFromTrack(track: MediaTrack, state: PlayerState, next?: MediaTrack): EmbedData {
 	let color = 0xdc0000;
 	let repeat = 'Off';
 	if (state.repeat) {
@@ -78,6 +79,10 @@ function createEmbedDataFromTrack(track: MediaTrack, state: PlayerState): EmbedD
 				name: 'Volume:',
 				value: `${state.volume}`,
 				inline: true,
+			},
+			{
+				name: 'Next:',
+				value: next ? next.title : '\u2009',
 			},
 		],
 		color: color,
@@ -149,11 +154,50 @@ function createCommandHelpEmbed(command: Command): EmbedBuilder {
  * @returns {EmbedBuilder} - Returns the embed.
  */
 function createMusicPlayerHelpEmbed(): EmbedBuilder {
-	const embed = new EmbedBuilder().setColor(0x0066ff).setTitle('Help for the Music Player');
-	let description = '';
-	description += `**Description:**\nComing soon.\n\n`;
-	description += `**Usage:**\n`;
-	embed.setDescription(description);
+	const description: string =
+		'**Description:**\nThe Music Player is a unique way of giving the Music Bot a visual interface and some controlability via reactions.\nThe Bot wont play any age restricted or private videos/playlists on YouTube\n\n' +
+		'**Chat Commands:** *just type in the channel*\n' +
+		'v, vol, volume and a number from 1-100\n' +
+		'- changes the volume\n' +
+		'- example: v50\n\n' +
+		'+ and the string to search for\n' +
+		'- searches for the given string on youtube\n' +
+		'- example: +rick roll\n\n' +
+		'just throw in a link\n' +
+		'- any link from YouTube or media that contains audio, like a webm, avi, mov ..., can be played via the bot\n' +
+		'- example: https://www.youtube.com/watch?v=dQw4w9WgXcQ';
+	const fields: APIEmbedField[] = [
+		{
+			name: '🎶',
+			value: 'Sends you the link of the currently playing song via DM. *Wont work if your DMs are closed or friends only*',
+		},
+		{
+			name: '⏯️',
+			value: 'Pauses or resumes the current song',
+		},
+		{
+			name: '⏭️',
+			value: 'Skips to the next song',
+		},
+		{
+			name: '⏹️',
+			value: 'Stops the current song and clears the queue',
+		},
+		{
+			name: '🔂',
+			value: 'Toggles repeating the current song',
+		},
+		{
+			name: '🔁',
+			value: 'Toggles repeating all songs in the queue',
+		},
+		{
+			name: '⏏️',
+			value: 'Stops the playback and leaves the VC',
+		},
+	];
+
+	const embed = new EmbedBuilder().setTitle('Help for the Music Player').setDescription(description).addFields(fields).setColor(0x0066ff);
 
 	return embed;
 }
