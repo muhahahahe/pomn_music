@@ -60,7 +60,9 @@ export default class Main {
 		this.client.on('messageCreate', async (message) => {
 			const channels = this.config.music_channels.map((guild: { channelId: string }) => guild.channelId);
 			if (!channels.includes(message.channelId)) return;
-			message.delete().catch(() => {});
+			setTimeout(() => {
+				message.delete().catch(() => {});
+			}, 400);
 			if (message.author.bot) return;
 			const member = message.member;
 			if (!member) return;
