@@ -27,6 +27,7 @@ export default class Main {
 		this.listenForMusicChannel();
 		this.listenForVoiceStateUpdate();
 		this.regCommands();
+		console.log('Bot ready!');
 	}
 
 	private regCommands(): void {
