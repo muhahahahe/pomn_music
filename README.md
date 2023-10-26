@@ -14,7 +14,7 @@ To run POMN Music on your computer or server, you will need the following prereq
 
 You can install POMN Music by following these steps:
 
-1. Download the release ZIP-File and extract only the folder src in a directory of your choice
+1. Download the release ZIP-File `pomn_music.zip` and extract only the folder src in a directory of your choice
 
 2. Install dependencies:
    run this command in the directory
@@ -37,7 +37,7 @@ You can install POMN Music by following these steps:
 
 If you prefer to use Docker to run POMN Music, follow these steps:
 
-1. Extract the contents of the ZIP file into a folder on your server.
+1. Download and extract the contents of the release ZIP-File `pomn-music.zip` into a folder on your server.
 
 2. Navigate to the extracted folder:
 
