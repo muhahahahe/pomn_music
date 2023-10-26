@@ -5,7 +5,7 @@ POMN Music is a Discord bot that serves as a music player for any media file lin
 
 ## Installation
 
-# On Your Local Machine or Server
+### On Your Local Machine or Server
 
 To run POMN Music on your computer or server, you will need the following prerequisites:
 
@@ -30,7 +30,7 @@ You can install POMN Music by following these steps:
    `npm start`
 
 
-# Using Docker
+### Using Docker
 
 If you prefer to use Docker to run POMN Music, follow these steps:
 
