@@ -17,7 +17,7 @@ import PlayerManager from './PlayerManager';
 
 export default class Main {
 	public readonly commands: Command[] = getCommands();
-	public config: Config = require('../config.json');
+	public config: Config = require('../data/config.json');
 	public client: Client;
 	constructor(client: Client) {
 		this.client = client;

@@ -18,7 +18,7 @@ import axios from 'axios';
 import { IAudioMetadata, parseStream } from 'music-metadata';
 import path from 'path';
 import fs from 'fs';
-import { Command, Config, MediaTrack, MusicChannelData, ResolvedReaction, YoutubeApiItem } from '../interfaces';
+import { Command, Config, MediaTrack, MusicChannelData, ResolvedReaction } from '../interfaces';
 import PlayerManager from '../classes/PlayerManager';
 import Main from '../classes/Main';
 
@@ -86,7 +86,7 @@ function registerCommands(clientId: string, commands: RESTPostAPIApplicationComm
 		try {
 			await rest.put(Routes.applicationCommands(clientId), { body: commands });
 			console.log(`Successfully registered ${commands.length} commands`);
-			const configJSON = fs.readFileSync(path.join(__dirname, '../config.json'), 'utf8');
+			const configJSON = fs.readFileSync(path.join(__dirname, '../data/config.json'), 'utf8');
 			const config: Config = JSON.parse(configJSON);
 			config.reg_commands = true;
 			writeConfig(config);
@@ -105,7 +105,7 @@ function registerCommands(clientId: string, commands: RESTPostAPIApplicationComm
 function updateMusicChannelConfig(data: MusicChannelData, old?: boolean): Config | false {
 	let configJSON;
 	try {
-		configJSON = fs.readFileSync(path.join(__dirname, '../config.json'), 'utf8');
+		configJSON = fs.readFileSync(path.join(__dirname, '../data/config.json'), 'utf8');
 	} catch (error) {
 		console.error('Reading config failed: ', error);
 		return false;
@@ -131,7 +131,7 @@ function updateMusicChannelConfig(data: MusicChannelData, old?: boolean): Config
 function removeMusicChannelConfig(guildId: string): Config | false {
 	let configJSON;
 	try {
-		configJSON = fs.readFileSync(path.join(__dirname, '../config.json'), 'utf8');
+		configJSON = fs.readFileSync(path.join(__dirname, '../data/config.json'), 'utf8');
 	} catch (error) {
 		console.error('Reading config failed: ', error);
 		return false;
@@ -153,7 +153,7 @@ function removeMusicChannelConfig(guildId: string): Config | false {
  */
 function writeConfig(config: Config): void {
 	try {
-		fs.writeFileSync(path.join(__dirname, '../config.json'), JSON.stringify(config));
+		fs.writeFileSync(path.join(__dirname, '../data/config.json'), JSON.stringify(config));
 	} catch (error) {
 		console.error('Writing config failed: \n', error);
 	}
