@@ -47,6 +47,7 @@ export default {
 				if (typeof track_info === 'string') return interaction.reply({ content: track_info, ephemeral: true });
 				playerManager.addTrack(track_info);
 				if (playerManager.isStopped()) playerManager.play();
+				else if (playerManager.playerEmbedHandler) playerManager.playerEmbedHandler.info(`Added *${track_info.title}*`);
 
 				break;
 			case 'youtube_playlist':
@@ -58,6 +59,7 @@ export default {
 					playerManager.addTrack(track);
 				});
 				if (playerManager.isStopped()) playerManager.play();
+				else if (playerManager.playerEmbedHandler) playerManager.playerEmbedHandler.info(`Added *${track_info.length}* tracks`);
 
 				break;
 			case 'soundcloud':
@@ -87,6 +89,7 @@ export default {
 				if (typeof track_info === 'string') return interaction.reply({ content: track_info, ephemeral: true });
 				playerManager.addTrack(track_info);
 				if (playerManager.isStopped()) playerManager.play();
+				else if (playerManager.playerEmbedHandler) playerManager.playerEmbedHandler.info(`Added *${track_info.title}*`);
 
 				break;
 		}
