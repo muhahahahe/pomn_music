@@ -358,41 +358,6 @@ async function getYoutube(url: string, user: User, channel: VoiceChannel): Promi
 	};
 	return data;
 }
-// async function getYoutube(url: string, user: User, channel: VoiceChannel): Promise<MediaTrack | false> {
-// 	const videoId = url.split('v=')[1];
-// 	const apiKey = process.env.YOUTUBE_API_KEY;
-// 	const apiUrl = `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&key=${apiKey}&part=snippet,contentDetails`;
-
-// 	try {
-// 		const response = await axios.get(apiUrl);
-// 		const items = response.data.items;
-// 		if (!items || items.length === 0) return false;
-
-// 		const details = items[0];
-// 		const data: MediaTrack = {
-// 			requester: user,
-// 			voiceChannel: channel,
-// 			title: details.snippet.title,
-// 			durationInSec: convertDurationToSec(details.contentDetails.duration),
-// 			url: `https://www.youtube.com/watch?v=${details.id}`,
-// 			thumbnail: details.snippet.thumbnails.default.url,
-// 			type: 'youtube',
-// 		};
-// 		return data;
-// 	} catch (error) {
-// 		console.error(error);
-// 		return false;
-// 	}
-// }
-// function convertDurationToSec(duration: string): number {
-// 	if (!duration) return 0;
-// 	const match = duration.match(/PT(\d+H)?(\d+M)?(\d+S)?/);
-// 	if (!match) return 0;
-// 	const hours = (parseInt(match[1]) || 0) * 3600;
-// 	const minutes = (parseInt(match[2]) || 0) * 60;
-// 	const seconds = parseInt(match[3]) || 0;
-// 	return hours + minutes + seconds;
-// }
 
 /**
  * Gets an array of MediaTrack objects from a YouTube playlist URL.
@@ -426,37 +391,6 @@ async function getYoutubePlaylist(url: string, user: User, channel: VoiceChannel
 	}
 	return data;
 }
-// async function getYoutubePlaylist(url: string, user: User, channel: VoiceChannel): Promise<MediaTrack[] | string> {
-// 	const playlistId = url.split('list=')[1];
-// 	const apiKey = process.env.YOUTUBE_API_KEY;
-// 	let apiUrl:
-// 		| string
-// 		| null = `https://www.googleapis.com/youtube/v3/playlistItems?playlistId=${playlistId}&key=${apiKey}&part=snippet,contentDetails&maxResults=50`;
-// 	let playlistItems: MediaTrack[] = [];
-
-// 	try {
-// 		while (apiUrl) {
-// 			const response: AxiosResponse = await axios.get(apiUrl);
-// 			const items: YoutubeApiItem[] = response.data.items;
-// 			if (!items || items.length === 0) return 'Playlist is empty.';
-
-// 			for (const item of items) {
-// 				const videoUrl = `https://www.youtube.com/watch?v=${item.snippet.resourceId.videoId}`;
-// 				const videoData = await getYoutube(videoUrl, user, channel);
-// 				if (videoData) {
-// 					playlistItems.push(videoData);
-// 				}
-// 			}
-
-// 			apiUrl = response.data.nextPageToken ? `${apiUrl}&pageToken=${response.data.nextPageToken}` : null;
-// 		}
-
-// 		return playlistItems;
-// 	} catch (error) {
-// 		console.error(error);
-// 		return 'Error fetching playlist.';
-// 	}
-// }
 
 /**
  * Gets a MediaTrack from a Soundcloud URL.

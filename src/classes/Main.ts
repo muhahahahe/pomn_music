@@ -83,11 +83,13 @@ export default class Main {
 					}
 					playerManager.addTrack(track);
 					if (playerManager.isStopped()) playerManager.play();
-					if (playerManager.playerEmbedHandler) playerManager.playerEmbedHandler.info(`Added *${track.title}*`);
+					else if (playerManager.playerEmbedHandler) playerManager.playerEmbedHandler.info(`Added *${track.title}*`);
 				}
 				if (message.content.startsWith('v') || message.content.startsWith('vol') || message.content.startsWith('volume')) {
-					const volume = Number(message.content.replace(/^\D+/g, '').trim());
+					let volume = Number(message.content.replace(/^\D+/g, '').trim());
 					if (isNaN(volume)) return;
+					if (volume < 0) volume = 1;
+					if (volume > 100) volume = 100;
 					playerManager.volume(volume);
 				}
 			}
@@ -102,7 +104,7 @@ export default class Main {
 				}
 				playerManager.addTrack(track);
 				if (playerManager.isStopped()) playerManager.play();
-				if (playerManager.playerEmbedHandler) playerManager.playerEmbedHandler.info(`Added *${track.title}*`);
+				else if (playerManager.playerEmbedHandler) playerManager.playerEmbedHandler.info(`Added *${track.title}*`);
 			}
 
 			if (check === 'youtube_playlist') {
@@ -117,7 +119,7 @@ export default class Main {
 					playerManager.addTrack(track);
 				});
 				if (playerManager.isStopped()) playerManager.play();
-				if (playerManager.playerEmbedHandler) playerManager.playerEmbedHandler.info(`Added *${tracks.length} tracks*`);
+				else if (playerManager.playerEmbedHandler) playerManager.playerEmbedHandler.info(`Added *${tracks.length} tracks*`);
 			}
 
 			if (check === 'media') {
@@ -179,9 +181,6 @@ export default class Main {
 				if (members.size === 0) {
 					PlayerManager.getInstance(oldState.member!, this).destroyVoiceConnection();
 				}
-			}
-			if (newState.channelId) {
-				//handle join
 			}
 		});
 	}

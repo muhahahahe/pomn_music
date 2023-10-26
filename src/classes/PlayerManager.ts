@@ -30,7 +30,6 @@ export default class PlayerManager {
 	public audioResource: AudioResource | null = null;
 	public state: PlayerState;
 	public current: MediaTrack | null = null;
-	public repeatingAllQueue: MediaTrack[] = [];
 	public queue: MediaTrack[] = [];
 	constructor(main: Main, guildId: string) {
 		this.main = main;
@@ -50,7 +49,6 @@ export default class PlayerManager {
 		};
 	}
 
-	//connection methodes
 	public destroyVoiceConnection(): void {
 		if (this.player) {
 			this.player.stop();
@@ -162,10 +160,10 @@ export default class PlayerManager {
 
 	public async repeatAllPlay(): Promise<void> {
 		if (!this.player) return;
-		const track = this.repeatingAllQueue.shift();
+		const track = this.queue.shift();
 		if (!track) return;
 		this.current = track;
-		this.repeatingAllQueue.push(track);
+		this.queue.push(track);
 		try {
 			this.audioResource = await createResourceStream(track, this.state.volume);
 		} catch (error) {
@@ -186,8 +184,7 @@ export default class PlayerManager {
 			this.player.unpause();
 		}
 		if (this.playerEmbedHandler) {
-			this.playerEmbedHandler.updateEmbed(this.current, this.state);
-			this.playerEmbedHandler.info(this.isPaused() ? 'Paused playback' : 'Resumed playback');
+			this.playerEmbedHandler.updateEmbed(this.current, this.state, this.queue.length > 0 ? this.queue[0] : undefined);
 		}
 	}
 
@@ -210,7 +207,7 @@ export default class PlayerManager {
 			this.setRepeatAll(false);
 		}
 		if (this.playerEmbedHandler) {
-			this.playerEmbedHandler.updateEmbed(this.current, this.state);
+			this.playerEmbedHandler.updateEmbed(this.current, this.state, this.current);
 		}
 	}
 
@@ -219,14 +216,12 @@ export default class PlayerManager {
 		if (!this.current) return;
 		if (this.isRepeatedAll()) {
 			this.setRepeatAll(false);
-			this.repeatingAllQueue = [];
 		} else {
 			this.setRepeatAll(true);
 			this.setRepeat(false);
-			this.repeatingAllQueue.push(...this.queue, this.current);
 		}
 		if (this.playerEmbedHandler) {
-			this.playerEmbedHandler.updateEmbed(this.current, this.state);
+			this.playerEmbedHandler.updateEmbed(this.current, this.state, this.queue.length > 0 ? this.queue[0] : this.current);
 		}
 	}
 
@@ -240,8 +235,7 @@ export default class PlayerManager {
 			this.setVolume(number);
 		}
 		if (this.playerEmbedHandler && this.current) {
-			this.playerEmbedHandler.updateEmbed(this.current, this.state);
-			this.playerEmbedHandler.info(`Volume set to ${number}`);
+			this.playerEmbedHandler.updateEmbed(this.current, this.state, this.queue.length > 0 ? this.queue[0] : undefined);
 		}
 	}
 

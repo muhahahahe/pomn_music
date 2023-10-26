@@ -9,8 +9,8 @@ export default class PlayerEmbedHandler {
 		this.message = message;
 	}
 
-	public updateEmbed(track: MediaTrack, state: PlayerState): void {
-		this.current = createPlayerEmbed(createEmbedDataFromTrack(track, state));
+	public updateEmbed(track: MediaTrack, state: PlayerState, next?: MediaTrack): void {
+		this.current = createPlayerEmbed(createEmbedDataFromTrack(track, state, next));
 		this.message.edit({ embeds: [this.current] });
 	}
 
