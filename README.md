@@ -55,10 +55,10 @@ If you prefer to use Docker to run POMN Music, follow these steps:
    
    services:
      pomn_music:
-     image: pomn_music # Replace with your custom image name if needed
-     volumes:
-     - /path/to/extracted/folder/src/data:/usr/src/bot/data
-     restart: unless-stopped
+       image: pomn_music # Replace with your custom image name if needed
+       volumes:
+       - /path/to/extracted/folder/src/data:/usr/src/bot/data
+       restart: unless-stopped
    ```
    Ensure that the image field matches the name you provided in the docker build command if you customized it.
 
