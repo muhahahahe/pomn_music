@@ -21,7 +21,7 @@ You can install POMN Music by following these steps:
    
    `npm install`
 
-4. Paste your token in the `.env` file and add your Discord bot token. You can create a Discord application and obtain the token in the [Discord Developer Portal](https://discord.com/developers/applications). Also add the bot to your server via the OAuth2 > URL Generator.
+4. Paste your token in the `.env` file. You can create a Discord application and obtain the token in the [Discord Developer Portal](https://discord.com/developers/applications). Also add the bot to your server via the OAuth2 > URL Generator.
    The file should look like this:
    
    `TOKEN=YourTokenHere`
@@ -43,7 +43,7 @@ If you prefer to use Docker to run POMN Music, follow these steps:
 
    `cd /path/to/extracted/folder`
 
-3. Paste your token in the `./src/.env` file and add your Discord bot token. You can create a Discord application and obtain the token in the [Discord Developer Portal](https://discord.com/developers/applications). Also add the bot to your server via the OAuth2 > URL Generator.
+3. Paste your token in the `./src/.env` file. You can create a Discord application and obtain the token in the [Discord Developer Portal](https://discord.com/developers/applications). Also add the bot to your server via the OAuth2 > URL Generator.
    The file should look like this:
    
    `TOKEN=YourTokenHere`
