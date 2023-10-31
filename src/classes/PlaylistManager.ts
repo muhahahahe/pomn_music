@@ -258,7 +258,9 @@ export default class PlaylistManager {
 		}
 		this.getPlaylistPage();
 
-		const reply = await this.interaction.reply({ embeds: [this.currentEmbed], components: this.currentActionRow }).catch(() => {});
+		const reply = await this.interaction
+			.reply({ embeds: [this.currentEmbed], components: this.currentActionRow, ephemeral: this.main.config.silent_mode })
+			.catch(() => {});
 
 		if (!reply) return;
 		this.listenForList(reply);
@@ -279,7 +281,9 @@ export default class PlaylistManager {
 		this.currentPlaylist = playlist;
 		this.getPlaylistManage();
 
-		const reply = await this.interaction.reply({ embeds: [this.currentEmbed], components: this.currentActionRow }).catch(() => {});
+		const reply = await this.interaction
+			.reply({ embeds: [this.currentEmbed], components: this.currentActionRow, ephemeral: this.main.config.silent_mode })
+			.catch(() => {});
 		if (!reply) return;
 		this.listenForManage(reply);
 	}
