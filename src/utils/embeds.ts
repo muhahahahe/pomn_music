@@ -254,6 +254,7 @@ function createPlaylistManageEmbed(name: string, tracks: MediaTrack[], start: nu
 			`Added by: ${track.requester} Length: ${secondsToTime(track.durationInSec)}\n` +
 			`${track.url}\n\n`;
 	}
+	if (content.length === 0) content = 'No tracks added yet!';
 	const embed = new EmbedBuilder().setTitle(name).setDescription(content).setColor(0x0066ff);
 
 	return embed;
