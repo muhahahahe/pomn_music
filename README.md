@@ -30,10 +30,10 @@ You can install POMN Music by following these steps:
 
 4. Configure any settings in the `data/config.json` if necessary.
    
-   name - the name you want to set for the bot
-   avatar - a link to an image you want to set as the avatar
-   silent_mode - whether you want the bots command responses to be [ephemerals](https://support.discord.com/hc/en-us/articles/1500000580222-Ephemeral-Messages-FAQ#:~:text=An%20%22Ephemeral%20Message%22%20is%20a,long%20enough%2C%20or%20restart%20Discord.)
-   player_embed - whether you want to use the bots special player
+   name - the name you want to set for the bot\
+   avatar - a link to an image you want to set as the avatar\
+   silent_mode - whether you want the bots command responses to be [ephemerals](https://support.discord.com/hc/en-us/articles/1500000580222-Ephemeral-Messages-FAQ#:~:text=An%20%22Ephemeral%20Message%22%20is%20a,long%20enough%2C%20or%20restart%20Discord.)\
+   player_embed - whether you want to use the bots special player\
    playlists - whether you want the playlist feature activated
 
 5. Start the bot:
@@ -58,10 +58,10 @@ If you prefer to use Docker to run POMN Music, follow these steps:
 
 4. Configure any settings in the `data/config.json` if necessary.
    
-   name - the name you want to set for the bot
-   avatar - a link to an image you want to set as the avatar
-   silent_mode - whether you want the bots command responses to be [ephemerals](https://support.discord.com/hc/en-us/articles/1500000580222-Ephemeral-Messages-FAQ#:~:text=An%20%22Ephemeral%20Message%22%20is%20a,long%20enough%2C%20or%20restart%20Discord.)
-   player_embed - whether you want to use the bots special player
+   name - the name you want to set for the bot\
+   avatar - a link to an image you want to set as the avatar\
+   silent_mode - whether you want the bots command responses to be [ephemerals](https://support.discord.com/hc/en-us/articles/1500000580222-Ephemeral-Messages-FAQ#:~:text=An%20%22Ephemeral%20Message%22%20is%20a,long%20enough%2C%20or%20restart%20Discord.)\
+   player_embed - whether you want to use the bots special player\
    playlists - whether you want the playlist feature activated
 
 5. Build the Docker image:
