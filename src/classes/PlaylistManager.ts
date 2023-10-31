@@ -180,7 +180,7 @@ export default class PlaylistManager {
 		this.currentPlaylist = null;
 		this.currentPlaylists = this.guildPlaylists.slice((this.currentPage - 1) * 10, this.currentPage * 10 - 1);
 		this.currentEmbed = createPlaylistListEmbed(this.currentPlaylists);
-		this.currentActionRow.push(getActionRow(page_components()));
+		if (this.currentPlaylists.length > 10) this.currentActionRow.push(getActionRow(page_components()));
 		this.currentActionRow.push(getActionRow([selectplaylist_components(this.currentPlaylists.map((p) => p.name))]));
 	}
 
