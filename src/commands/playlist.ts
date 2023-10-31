@@ -65,10 +65,14 @@ export default {
 
 		if (interaction.options.getSubcommand() === 'manage') {
 			const name = interaction.options.getString('name', true);
+			const playlistManager = new PlaylistManager(main, interaction);
+			playlistManager.manage(name);
 		}
 
 		if (interaction.options.getSubcommand() === 'play') {
 			const name = interaction.options.getString('name', true);
+			const playlistManager = new PlaylistManager(main, interaction);
+			playlistManager.play(name);
 		}
 	},
 };
