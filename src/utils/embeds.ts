@@ -1,5 +1,5 @@
 import { APIEmbedField, EmbedAssetData, EmbedBuilder, EmbedData } from 'discord.js';
-import { Command, MediaTrack, PlayerState } from '../interfaces';
+import { Command, MediaTrack, PlayerState, Playlist } from '../interfaces';
 import { secondsToTime } from './utils';
 
 const BasicPlayerEmbed = {
@@ -202,6 +202,63 @@ function createMusicPlayerHelpEmbed(): EmbedBuilder {
 	return embed;
 }
 
+/**
+ * Creates a playlist list embed of the sliced array of guild playlists.
+ *
+ * @param playlists - The array of playlists.
+ * @returns {EmbedBuilder} - Returns an embed.
+ */
+function createPlaylistListEmbed(playlists: Playlist[]): EmbedBuilder {
+	let content: string = '';
+	for (const playlist of playlists) {
+		content += `**${playlist.name}**`;
+		if (playlist.description && playlist.description.length > 0) content += `\n${playlist.description}`;
+		content += `\n${playlist.tracks.length} Tracks\n\n`;
+	}
+	const embed = new EmbedBuilder().setTitle('Playlists').setDescription(content).setColor(0x0066ff);
+
+	return embed;
+}
+
+/**
+ * Creates a view playlist embed with the array of tracks sliced per page.
+ *
+ * @param name - The name of the playlist.
+ * @param tracks - The spliced array of tracks.
+ * @returns {EmbedBuilder} - Returns an embed.
+ */
+function createPlaylistViewEmbed(name: string, tracks: MediaTrack[], start: number): EmbedBuilder {
+	let content: string = '';
+	for (let i = 0; i < tracks.length; i++) {
+		const track = tracks[i];
+		content += `${i + start + 1}. ${track.title}\n`;
+	}
+	const embed = new EmbedBuilder().setTitle(name).setDescription(content).setColor(0x0066ff);
+
+	return embed;
+}
+
+/**
+ * Creates a manage playlist embed with the array of tracks sliced per page.
+ *
+ * @param name - The name of the playlist.
+ * @param tracks - The spliced array of tracks.
+ * @returns {EmbedBuilder} - Returns an embed.
+ */
+function createPlaylistManageEmbed(name: string, tracks: MediaTrack[], start: number): EmbedBuilder {
+	let content: string = '';
+	for (let i = 0; i < tracks.length; i++) {
+		const track = tracks[i];
+		content +=
+			`${i + start + 1}. ${track.title}\n` +
+			`Added by: ${track.requester} Length: ${secondsToTime(track.durationInSec)}\n` +
+			`${track.url}\n\n`;
+	}
+	const embed = new EmbedBuilder().setTitle(name).setDescription(content).setColor(0x0066ff);
+
+	return embed;
+}
+
 export {
 	createBasicPlayerEmbed,
 	createEmbedDataFromTrack,
@@ -210,4 +267,7 @@ export {
 	createCommandOverviewEmbed,
 	createCommandHelpEmbed,
 	createMusicPlayerHelpEmbed,
+	createPlaylistListEmbed,
+	createPlaylistViewEmbed,
+	createPlaylistManageEmbed,
 };

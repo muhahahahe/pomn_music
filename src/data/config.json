@@ -1,4 +1,7 @@
 {
+	"name": "POMN_Music",
+	"avatar": "https://cdn.discordapp.com/attachments/1042058161777029252/1165699090538037378/Pomn_music.png",
+	"silent_mode": true,
 	"player_embed": true,
 	"comment": "do NOT change any value below this point",
 	"reg_commands": false,

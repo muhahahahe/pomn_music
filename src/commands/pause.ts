@@ -1,6 +1,5 @@
 import { ChatInputCommandInteraction, GuildMember, SlashCommandBuilder } from 'discord.js';
 import Main from '../classes/Main';
-import PlayerManager from '../classes/PlayerManager';
 import { getMusicChannelMessage, getPlayerManager } from '../utils/utils';
 
 export default {
@@ -22,9 +21,9 @@ export default {
 			const state = playerManager.isPlaying() ? 'Paused playback' : 'Unpaused playback';
 			playerManager.pause();
 
-			return interaction.reply({ content: state });
+			return interaction.reply({ content: state, ephemeral: main.config.silent_mode }).catch(() => {});
 		}
 
-		return interaction.reply({ content: 'Nothing is playing', ephemeral: true });
+		return interaction.reply({ content: 'Nothing is playing', ephemeral: true }).catch(() => {});
 	},
 };

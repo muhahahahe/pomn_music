@@ -14,11 +14,13 @@ export default {
 		const member = interaction.member as GuildMember;
 		const musicMessage = await getMusicChannelMessage(interaction.guildId!, main);
 		if (musicMessage && musicMessage.channelId === interaction.channelId)
-			return interaction.reply({ content: 'Use the music player functions instead of slash commands in this channel!', ephemeral: true });
+			return interaction
+				.reply({ content: 'Use the music player functions instead of slash commands in this channel!', ephemeral: true })
+				.catch(() => {});
 		const playerManager = getPlayerManager(member, main, musicMessage);
-		if (typeof playerManager === 'string') return interaction.reply({ content: playerManager, ephemeral: true });
-		if (!playerManager.current) return interaction.reply({ content: 'There is no song playing.', ephemeral: true });
+		if (typeof playerManager === 'string') return interaction.reply({ content: playerManager, ephemeral: true }).catch(() => {});
+		if (!playerManager.current) return interaction.reply({ content: 'There is no song playing.', ephemeral: true }).catch(() => {});
 		playerManager.repeatAll();
-		return interaction.reply({ content: 'Repeating all songs in Queue', ephemeral: true });
+		return interaction.reply({ content: 'Repeating all songs in Queue', ephemeral: main.config.silent_mode }).catch(() => {});
 	},
 };

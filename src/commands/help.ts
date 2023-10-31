@@ -2,7 +2,7 @@ import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import Main from '../classes/Main';
 import HelpEmbedHandler from '../classes/HelpEmbedHandler';
 
-const commands = ['Music Player', 'Pause', 'Play', 'Queue', 'Repeat', 'Skip', 'Stop', 'Volume', 'Setup'];
+const commands = ['Music Player', 'Pause', 'Play', 'Playlist', 'Queue', 'Repeat', 'Skip', 'Stop', 'Volume', 'Setup'];
 export default {
 	data: new SlashCommandBuilder()
 		.setName('help')

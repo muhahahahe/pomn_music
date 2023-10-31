@@ -1,6 +1,5 @@
 import { ChatInputCommandInteraction, GuildMember, SlashCommandBuilder } from 'discord.js';
 import Main from '../classes/Main';
-import PlayerManager from '../classes/PlayerManager';
 import { getMusicChannelMessage, getPlayerManager } from '../utils/utils';
 
 export default {
@@ -15,11 +14,13 @@ export default {
 		const member = interaction.member as GuildMember;
 		const musicMessage = await getMusicChannelMessage(interaction.guildId!, main);
 		if (musicMessage && musicMessage.channelId === interaction.channelId)
-			return interaction.reply({ content: 'Use the music player functions instead of slash commands in this channel!', ephemeral: true });
+			return interaction
+				.reply({ content: 'Use the music player functions instead of slash commands in this channel!', ephemeral: true })
+				.catch(() => {});
 		const playerManager = getPlayerManager(member, main, musicMessage);
-		if (typeof playerManager === 'string') return interaction.reply({ content: playerManager, ephemeral: true });
-		if (!playerManager.current) return interaction.reply({ content: 'There is no song playing.', ephemeral: true });
+		if (typeof playerManager === 'string') return interaction.reply({ content: playerManager, ephemeral: true }).catch(() => {});
+		if (!playerManager.current) return interaction.reply({ content: 'There is no song playing.', ephemeral: true }).catch(() => {});
 		playerManager.setRepeat(true);
-		return interaction.reply({ content: 'Repeating the current song', ephemeral: true });
+		return interaction.reply({ content: 'Repeating the current song', ephemeral: main.config.silent_mode }).catch(() => {});
 	},
 };

@@ -1,6 +1,5 @@
 import { ChatInputCommandInteraction, GuildMember, SlashCommandBuilder } from 'discord.js';
 import Main from '../classes/Main';
-import PlayerManager from '../classes/PlayerManager';
 import { getMusicChannelMessage, getPlayerManager } from '../utils/utils';
 
 export default {
@@ -19,12 +18,15 @@ export default {
 		const member = interaction.member as GuildMember;
 		const musicMessage = await getMusicChannelMessage(interaction.guildId!, main);
 		if (musicMessage && musicMessage.channelId === interaction.channelId)
-			return interaction.reply({ content: 'Use the music player functions instead of slash commands in this channel!', ephemeral: true });
+			return interaction
+				.reply({ content: 'Use the music player functions instead of slash commands in this channel!', ephemeral: true })
+				.catch(() => {});
 		const playerManager = getPlayerManager(member, main, musicMessage);
-		if (typeof playerManager === 'string') return interaction.reply({ content: playerManager, ephemeral: true });
-		if (!playerManager.isConnected()) return interaction.reply({ content: 'Not connected to a voice channel.', ephemeral: true });
+		if (typeof playerManager === 'string') return interaction.reply({ content: playerManager, ephemeral: true }).catch(() => {});
+		if (!playerManager.isConnected())
+			return interaction.reply({ content: 'Not connected to a voice channel.', ephemeral: main.config.silent_mode }).catch(() => {});
 		const force = interaction.options.getBoolean('force') || false;
 		playerManager.stop(force);
-		return interaction.reply({ content: 'Stopped playback.', ephemeral: true });
+		return interaction.reply({ content: 'Stopped playback.', ephemeral: main.config.silent_mode }).catch(() => {});
 	},
 };

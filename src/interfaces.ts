@@ -1,12 +1,27 @@
 import { MessageReaction, SlashCommandBuilder, User, VoiceChannel } from 'discord.js';
 import Main from './classes/Main';
-import { AxiosResponse } from 'axios';
 
 interface Config {
+	name: string;
+	avatar: string;
+	silent_mode: boolean;
 	player_embed: boolean;
 	reg_commands: boolean;
 	music_channels: MusicChannelData[];
 	volume: VolumeData[];
+}
+
+interface Command {
+	data: SlashCommandBuilder;
+	help: CommandHelp;
+	execute: (interaction: any, main: Main) => {};
+}
+
+interface CommandHelp {
+	name: string;
+	description: string;
+	arguments: string;
+	usage: string;
 }
 
 interface MusicChannelData {
@@ -27,12 +42,31 @@ interface ResolvedReaction {
 
 interface MediaTrack {
 	requester: User;
-	voiceChannel: VoiceChannel;
+	voiceChannel?: VoiceChannel;
 	title: string;
 	url: string;
 	type: 'youtube' | 'soundcloud' | 'spotify' | 'media';
 	durationInSec: number;
 	thumbnail: string;
+}
+
+interface PlayerState {
+	connected: boolean;
+	playing: boolean;
+	paused: boolean;
+	stopped: boolean;
+	repeat: boolean;
+	repeatAll: boolean;
+	volume: number;
+	idletime: number;
+}
+
+interface Playlist {
+	guildId: string;
+	userId: string;
+	name: string;
+	description?: string;
+	tracks: MediaTrack[];
 }
 
 interface YoutubeApiItem {
@@ -52,28 +86,4 @@ interface YoutubeApiItem {
 	};
 }
 
-interface PlayerState {
-	connected: boolean;
-	playing: boolean;
-	paused: boolean;
-	stopped: boolean;
-	repeat: boolean;
-	repeatAll: boolean;
-	volume: number;
-	idletime: number;
-}
-
-interface CommandHelp {
-	name: string;
-	description: string;
-	arguments: string;
-	usage: string;
-}
-
-interface Command {
-	data: SlashCommandBuilder;
-	help: CommandHelp;
-	execute: (interaction: any, main: Main) => {};
-}
-
-export { Config, MusicChannelData, VolumeData, ResolvedReaction, MediaTrack, YoutubeApiItem, PlayerState, CommandHelp, Command };
+export { Config, Command, CommandHelp, MusicChannelData, VolumeData, ResolvedReaction, MediaTrack, PlayerState, Playlist, YoutubeApiItem };

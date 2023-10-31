@@ -18,7 +18,7 @@ import axios from 'axios';
 import { IAudioMetadata, parseStream } from 'music-metadata';
 import path from 'path';
 import fs from 'fs';
-import { Command, Config, MediaTrack, MusicChannelData, ResolvedReaction } from '../interfaces';
+import { Command, Config, MediaTrack, MusicChannelData, Playlist, ResolvedReaction } from '../interfaces';
 import PlayerManager from '../classes/PlayerManager';
 import Main from '../classes/Main';
 
@@ -156,6 +156,19 @@ function writeConfig(config: Config): void {
 		fs.writeFileSync(path.join(__dirname, '../data/config.json'), JSON.stringify(config));
 	} catch (error) {
 		console.error('Writing config failed: \n', error);
+	}
+}
+
+/**
+ * Writes the playlists to file
+ *
+ * @param {Playlist[]} playlists - The playlists data
+ */
+function writePlaylists(playlists: Playlist[]): void {
+	try {
+		fs.writeFileSync(path.join(__dirname, '../data/playlists.json'), JSON.stringify(playlists));
+	} catch (error) {
+		console.error('Writing playlists failed: \n', error);
 	}
 }
 
@@ -339,7 +352,7 @@ async function searchYoutube(query: string, user: User, channel: VoiceChannel): 
  * @param channel - The discord voice channel the user is in.
  * @returns {Promise<MediaTrack | false>} - Returns a promise with a MediaTrack object.
  */
-async function getYoutube(url: string, user: User, channel: VoiceChannel): Promise<MediaTrack | string> {
+async function getYoutube(url: string, user: User, channel?: VoiceChannel): Promise<MediaTrack | string> {
 	let result: InfoData | null = null;
 	try {
 		result = await video_basic_info(url);
@@ -428,7 +441,7 @@ async function getSoundcloud(url: string, user: User, channel: VoiceChannel): Pr
  * @param {VoiceChannel} channel - The discord.js VoiceChannel the user is in.
  * @returns {Promise<MediaTrack>} - Returns a promise with a MediaTrack object.
  */
-async function getMediaFile(url: string, user: User, channel: VoiceChannel): Promise<MediaTrack> {
+async function getMediaFile(url: string, user: User, channel?: VoiceChannel): Promise<MediaTrack> {
 	const metadata = await getMediaInfo(url);
 	const mediaTrack: MediaTrack = {
 		requester: user,
@@ -537,6 +550,7 @@ export {
 	updateMusicChannelConfig,
 	removeMusicChannelConfig,
 	writeConfig,
+	writePlaylists,
 	resolveReactionPartials,
 	removeReaction,
 	addReaction,

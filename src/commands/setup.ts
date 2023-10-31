@@ -30,25 +30,28 @@ export default {
 		usage: '/setup create [channel]\n/setup remove',
 	},
 	execute: async (interaction: ChatInputCommandInteraction, main: Main) => {
-		if (!main.config.player_embed) return interaction.reply({ content: 'The music player embed is disabled', ephemeral: true });
+		if (!main.config.player_embed)
+			return interaction.reply({ content: 'The music player embed is disabled', ephemeral: true }).catch(() => {});
 
 		if (interaction.options.getSubcommand() === 'create') {
 			const channel = interaction.options.getChannel('channel') || interaction.channel;
 			if (channel instanceof BaseGuildTextChannel) {
 			} else {
-				return interaction.reply({ content: 'Channel must be a guild text channel', ephemeral: true });
+				return interaction.reply({ content: 'Channel must be a guild text channel', ephemeral: true }).catch(() => {});
 			}
 
-			await interaction.deferReply();
+			await interaction.deferReply({ ephemeral: main.config.silent_mode });
 			const current_music_message = await getMusicChannelMessage(interaction.guildId!, main);
 			if (current_music_message) {
 				const confirm = getActionRow(confirm_components());
-				const reply = await interaction.editReply({
-					content: `The music channel is already set in ${current_music_message.channel}\n
-					Do you want to change it to ${channel}?`,
-					components: [confirm],
-				});
+				const reply = await interaction
+					.editReply({
+						content: `The music channel is already set in ${current_music_message.channel}\nDo you want to change it to ${channel}?`,
+						components: [confirm],
+					})
+					.catch(() => {});
 
+				if (!reply) return;
 				try {
 					const confirmation = await reply.awaitMessageComponent({
 						filter: (i) => i.user.id === interaction.user.id,
@@ -57,14 +60,14 @@ export default {
 					if (confirmation.customId === 'confirm') {
 						deleteMessage(current_music_message);
 					} else if (confirmation.customId === 'cancel') {
-						await confirmation.update({ content: 'Setup cancelled', components: [] });
+						await confirmation.update({ content: 'Setup cancelled', components: [] }).catch(() => {});
 						setTimeout(() => {
 							confirmation.deleteReply().catch(console.error);
 						}, 5000);
 						return;
 					}
 				} catch (error) {
-					interaction.editReply({ content: 'Confirmation not received within 1 minute, cancelling', components: [] });
+					interaction.editReply({ content: 'Confirmation not received within 1 minute, cancelling', components: [] }).catch(() => {});
 					setTimeout(() => {
 						interaction.deleteReply().catch(console.error);
 					}, 5000);
@@ -80,27 +83,30 @@ export default {
 					messageId: message.id,
 				};
 				const config = updateMusicChannelConfig(new_music_channel, current_music_message ? true : false);
-				if (!config) return interaction.editReply({ content: 'reading config failed' });
+				if (!config) return interaction.editReply({ content: 'reading config failed' }).catch(() => {});
 				main.setConfig(config);
 			} catch (error) {
 				console.error(error);
-				return interaction.editReply({ content: 'Creating the player failed!' });
+				return interaction.editReply({ content: 'Creating the player failed!' }).catch(() => {});
 			}
 
-			interaction.editReply({ content: 'Setup complete!' });
+			interaction.editReply({ content: 'Setup complete!' }).catch(() => {});
 			setTimeout(() => {
 				interaction.deleteReply().catch(console.error);
 			}, 5000);
 		} else {
 			const current_music_message = await getMusicChannelMessage(interaction.guildId!, main);
-			if (!current_music_message) return interaction.reply({ content: 'The music channel is not set', ephemeral: true });
+			if (!current_music_message) return interaction.reply({ content: 'The music channel is not set', ephemeral: true }).catch(() => {});
 			const confirm = getActionRow(confirm_components());
-			const reply = await interaction.reply({
-				content: `Do you want to remove the music player?`,
-				components: [confirm],
-				ephemeral: true,
-			});
+			const reply = await interaction
+				.reply({
+					content: `Do you want to remove the music player?`,
+					components: [confirm],
+					ephemeral: true,
+				})
+				.catch(() => {});
 
+			if (!reply) return;
 			try {
 				const confirmation = await reply.awaitMessageComponent({
 					filter: (i) => i.user.id === interaction.user.id,
@@ -116,18 +122,18 @@ export default {
 
 						main.setConfig(config);
 
-						interaction.editReply({ content: 'Removing complete!' });
+						interaction.editReply({ content: 'Removing complete!' }).catch(() => {});
 						setTimeout(() => {
 							interaction.deleteReply().catch(console.error);
 						}, 5000);
 					} catch (error) {
 						console.error(error);
 
-						return interaction.editReply({ content: 'Removing the player failed!' });
+						return interaction.editReply({ content: 'Removing the player failed!' }).catch(() => {});
 					}
 				}
 				if (confirmation.customId === 'cancel') {
-					await confirmation.update({ content: 'Setup cancelled', components: [] });
+					await confirmation.update({ content: 'Setup cancelled', components: [] }).catch(() => {});
 					setTimeout(() => {
 						confirmation.deleteReply().catch(console.error);
 					}, 5000);
@@ -135,7 +141,7 @@ export default {
 					return;
 				}
 			} catch (error) {
-				interaction.editReply({ content: 'Confirmation not received within 1 minute, cancelling', components: [] });
+				interaction.editReply({ content: 'Confirmation not received within 1 minute, cancelling', components: [] }).catch(() => {});
 				setTimeout(() => {
 					interaction.deleteReply().catch(console.error);
 				}, 5000);
