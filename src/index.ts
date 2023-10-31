@@ -24,10 +24,9 @@ const client = new Client({
 	},
 });
 
-const main = new Main(client);
-
 client.once(Events.ClientReady, (c) => {
 	console.log('Logged in as ' + c.user.tag);
+	const main = new Main(c);
 	main.init();
 });
 

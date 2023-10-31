@@ -6,6 +6,7 @@ interface Config {
 	avatar: string;
 	silent_mode: boolean;
 	player_embed: boolean;
+	playlists: boolean;
 	reg_commands: boolean;
 	music_channels: MusicChannelData[];
 	volume: VolumeData[];

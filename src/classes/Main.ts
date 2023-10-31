@@ -18,15 +18,17 @@ import PlayerManager from './PlayerManager';
 export default class Main {
 	public readonly commands: Command[] = getCommands();
 	public config: Config = require('../data/config.json');
-	public client: Client;
-	constructor(client: Client) {
+	public client: Client<true>;
+	constructor(client: Client<true>) {
 		this.client = client;
 	}
-	public init(): void {
+	public async init(): Promise<void> {
 		this.listenForCommands();
 		this.listenForMusicChannel();
 		this.listenForVoiceStateUpdate();
 		this.regCommands();
+		await this.client.user.setUsername(this.config.name).catch(() => {});
+		await this.client.user.setAvatar(this.config.avatar).catch(() => {});
 		console.log('Bot ready!');
 	}
 
@@ -35,6 +37,9 @@ export default class Main {
 		let data = this.commands.map((c) => c.data.toJSON());
 		if (!this.config.player_embed) {
 			data = data.filter((c) => c.name !== 'setup');
+		}
+		if (!this.config.playlists) {
+			data = data.filter((c) => c.name !== 'playlist');
 		}
 		registerCommands(this.client.user!.id, data);
 	}
