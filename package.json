@@ -23,6 +23,7 @@
 		"ffmpeg-static": "^5.2.0",
 		"libsodium-wrappers": "^0.7.11",
 		"music-metadata": "^7.13.4",
-		"play-dl": "^1.9.7"
+		"play-dl": "^1.9.7",
+		"socket.io": "^4.7.2"
 	}
 }

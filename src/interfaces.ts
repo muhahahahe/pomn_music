@@ -7,9 +7,22 @@ interface Config {
 	silent_mode: boolean;
 	player_embed: boolean;
 	playlists: boolean;
+	websocket: SocketData;
 	reg_commands: boolean;
 	music_channels: MusicChannelData[];
 	volume: VolumeData[];
+}
+
+interface SocketData {
+	activated: boolean;
+	secure: boolean;
+	port: number;
+	guildtokens: GuildToken[];
+}
+
+interface GuildToken {
+	guildId: string;
+	token: string;
 }
 
 interface Command {
@@ -87,4 +100,17 @@ interface YoutubeApiItem {
 	};
 }
 
-export { Config, Command, CommandHelp, MusicChannelData, VolumeData, ResolvedReaction, MediaTrack, PlayerState, Playlist, YoutubeApiItem };
+export {
+	Config,
+	SocketData,
+	GuildToken,
+	Command,
+	CommandHelp,
+	MusicChannelData,
+	VolumeData,
+	ResolvedReaction,
+	MediaTrack,
+	PlayerState,
+	Playlist,
+	YoutubeApiItem,
+};

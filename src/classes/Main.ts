@@ -14,10 +14,12 @@ import {
 } from '../utils/utils';
 import { Command, Config } from '../interfaces';
 import PlayerManager from './PlayerManager';
+import SocketServer from './SocketServer';
 
 export default class Main {
 	public readonly commands: Command[] = getCommands();
 	public config: Config = require('../data/config.json');
+	public socketServer: SocketServer | null = null;
 	public client: Client<true>;
 	constructor(client: Client<true>) {
 		this.client = client;
@@ -30,6 +32,9 @@ export default class Main {
 		await this.client.user.setUsername(this.config.name).catch(() => {});
 		await this.client.user.setAvatar(this.config.avatar).catch(() => {});
 		console.log('Bot ready!');
+		if (this.config.websocket.activated) {
+			this.socketServer = new SocketServer(this.config.websocket);
+		}
 	}
 
 	private regCommands(): void {
@@ -40,6 +45,9 @@ export default class Main {
 		}
 		if (!this.config.playlists) {
 			data = data.filter((c) => c.name !== 'playlist');
+		}
+		if (!this.config.websocket.activated) {
+			data = data.filter((c) => c.name !== 'socket');
 		}
 		registerCommands(this.client.user!.id, data);
 	}

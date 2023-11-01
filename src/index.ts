@@ -30,4 +30,8 @@ client.once(Events.ClientReady, (c) => {
 	main.init();
 });
 
+if (process.env.TOKEN?.length === 0) {
+	throw new Error('No token provided');
+}
+
 client.login(process.env.TOKEN);

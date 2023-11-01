@@ -4,6 +4,12 @@
 	"silent_mode": true,
 	"player_embed": true,
 	"playlists": true,
+	"websocket": {
+		"activated": false,
+		"secure": true,
+		"port": 3000,
+		"guildtokens": []
+	},
 	"comment": "do NOT change any value below this point",
 	"reg_commands": false,
 	"music_channels": [
