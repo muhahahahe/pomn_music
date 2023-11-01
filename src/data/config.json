@@ -8,6 +8,7 @@
 		"activated": false,
 		"secure": true,
 		"port": 3000,
+		"comment": "do NOT change any value in guildtokens",
 		"guildtokens": []
 	},
 	"comment": "do NOT change any value below this point",
