@@ -1,23 +1,28 @@
+import { GuildToken, MediaTrack, SocketData } from '../interfaces';
 import { Server } from 'socket.io';
+import PlayerManager from './PlayerManager';
 import http from 'http';
 import https from 'https';
-import { GuildToken, SocketData } from '../interfaces';
-import PlayerManager from './PlayerManager';
+import fs from 'fs';
+import path from 'path';
+import { checkURL, getYoutube, getYoutubePlaylist, searchYoutube } from '../utils/utils';
+import Main from './Main';
+import { VoiceChannel } from 'discord.js';
+import PlaylistManager from './PlaylistManager';
 
 export default class SocketServer {
 	private tokens: GuildToken[];
 	public io: Server;
+	public main: Main;
 
-	constructor(private data: SocketData) {
+	constructor(private data: SocketData, main: Main) {
 		this.tokens = data.guildtokens;
+		this.main = main;
 		let server;
 
 		if (data.secure) {
-			if (process.env.PRIVATEKEY?.length === 0 || process.env.CERTIFICATE?.length === 0) {
-				throw new Error('No private key or certificate provided');
-			}
-			let privateKey = Buffer.from(process.env.PRIVATEKEY!, 'base64').toString('utf8');
-			let certificate = Buffer.from(process.env.CERTIFICATE!, 'base64').toString('utf8');
+			let privateKey = fs.readFileSync(path.join(__dirname, '../ssl/key.pem'));
+			let certificate = fs.readFileSync(path.join(__dirname, '../ssl/cert.pem'));
 
 			const options = {
 				key: privateKey,
@@ -109,6 +114,55 @@ export default class SocketServer {
 			socket.on('shuffle', () => {
 				playerManager = PlayerManager.instances.get(socket.data.guildId);
 				if (playerManager) playerManager.shuffle();
+			});
+
+			socket.on('volume', (volume: number) => {
+				playerManager = PlayerManager.instances.get(socket.data.guildId);
+				if (playerManager) playerManager.volume(volume);
+			});
+
+			socket.on('search', async (query: string) => {
+				playerManager = PlayerManager.instances.get(socket.data.guildId);
+				if (!playerManager) return;
+				const check = await checkURL(query);
+				let track: MediaTrack | string = '';
+				if (check === 'search') {
+					if (query.startsWith('+')) {
+						track = await searchYoutube(query, this.main.client.user, playerManager.voiceChannel as VoiceChannel);
+						if (typeof track === 'string') return;
+						playerManager.addTrack(track);
+						if (playerManager.isStopped()) playerManager.play();
+						else if (playerManager.playerEmbedHandler) playerManager.playerEmbedHandler.info(`Added *${track.title}*`);
+					}
+
+					if (query.startsWith('!')) {
+						const name = query.replace('!', '').trim();
+						const playlistManager = new PlaylistManager(this.main);
+						playlistManager.playSocket(name, socket.data.guildId);
+					}
+				}
+
+				if (check === 'youtube') {
+					let url = query;
+					if (!query.startsWith('https')) url = 'https://' + url;
+					const track = await getYoutube(url, this.main.client.user, playerManager.voiceChannel as VoiceChannel);
+					if (typeof track === 'string') return;
+					playerManager.addTrack(track);
+					if (playerManager.isStopped()) playerManager.play();
+					else if (playerManager.playerEmbedHandler) playerManager.playerEmbedHandler.info(`Added *${track.title}*`);
+				}
+
+				if (check === 'youtube_playlist') {
+					let url = query;
+					if (!query.startsWith('https')) url = 'https://' + url;
+					const tracks = await getYoutubePlaylist(url, this.main.client.user, playerManager.voiceChannel as VoiceChannel);
+					if (typeof tracks === 'string') return;
+					tracks.forEach((track) => {
+						playerManager!.addTrack(track);
+					});
+					if (playerManager.isStopped()) playerManager.play();
+					else if (playerManager.playerEmbedHandler) playerManager.playerEmbedHandler.info(`Added *${tracks.length} tracks*`);
+				}
 			});
 		});
 
