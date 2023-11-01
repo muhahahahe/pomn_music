@@ -12,6 +12,7 @@ import { createPlayer, createResourceStream } from '../utils/utils';
 import { MediaTrack, PlayerState } from '../interfaces';
 import PlayerEmbedHandler from './PlayerEmbedHandler';
 import Main from './Main';
+import SocketServer from './SocketServer';
 
 export default class PlayerManager {
 	public static instances: Map<string, PlayerManager> = new Map();
@@ -22,6 +23,7 @@ export default class PlayerManager {
 		}
 		return PlayerManager.instances.get(guildId)!;
 	}
+	private socketServer: SocketServer | null;
 	public main: Main;
 	public guildId: string;
 	public playerEmbedHandler: PlayerEmbedHandler | null = null;
@@ -34,6 +36,7 @@ export default class PlayerManager {
 	constructor(main: Main, guildId: string) {
 		this.main = main;
 		this.guildId = guildId;
+		this.socketServer = main.socketServer;
 		if (!main.config.volume.find((v) => v.guildId === guildId)) {
 			this.setConfigVolume();
 		}
@@ -71,6 +74,7 @@ export default class PlayerManager {
 			volume: this.main.config.volume.find((v) => v.guildId === this.guildId)?.volume || 30,
 			idletime: 0,
 		};
+		if (this.socketServer) this.socketServer.io.to(this.guildId).emit('disconnected');
 	}
 
 	public createVoiceConnection(member: GuildMember, playerEmbed: false | Message): VoiceConnection {
@@ -100,24 +104,35 @@ export default class PlayerManager {
 					if (this.isRepeated()) return this.repeatPlay();
 					this.setRepeat(false);
 					this.current = null;
-					if (this.getQueue().length > 0) this.play();
-					if (this.playerEmbedHandler && !this.current) {
-						this.playerEmbedHandler.basicEmbed();
-					}
+					if (this.getQueue().length > 0) return this.play();
+					if (this.playerEmbedHandler) this.playerEmbedHandler.basicEmbed();
+					if (this.socketServer) this.socketServer.io.to(this.guildId).emit('idle', this.state);
 				}
 				if (newState.status === AudioPlayerStatus.Playing) {
 					this.setPlaying(true);
 					this.setPaused(false);
 					this.setStopped(false);
 					this.setIdletime(0);
-					if (this.playerEmbedHandler) this.playerEmbedHandler.updateEmbed(this.current!, this.state);
+					if (this.playerEmbedHandler)
+						this.playerEmbedHandler.updateEmbed(this.current!, this.state, this.queue.length > 0 ? this.queue[0] : undefined);
+					if (this.socketServer)
+						this.socketServer.io
+							.to(this.guildId)
+							.emit('playing', this.state, this.current!, this.queue.length > 0 ? this.queue[0] : undefined);
 				}
 				if (newState.status === AudioPlayerStatus.Paused) {
 					this.setPlaying(false);
 					this.setPaused(true);
 					this.setIdletime(Date.now());
+					if (this.playerEmbedHandler)
+						this.playerEmbedHandler.updateEmbed(this.current!, this.state, this.queue.length > 0 ? this.queue[0] : undefined);
+					if (this.socketServer)
+						this.socketServer.io
+							.to(this.guildId)
+							.emit('playing', this.state, this.current!, this.queue.length > 0 ? this.queue[0] : undefined);
 				}
 			});
+			if (this.socketServer) this.socketServer.io.to(this.guildId).emit('connected', this.state);
 		}
 		return this.connection;
 	}
@@ -160,7 +175,7 @@ export default class PlayerManager {
 
 	public async repeatAllPlay(): Promise<void> {
 		if (!this.player) return;
-		const track = this.queue.shift();
+		const track = this.getNextTrack();
 		if (!track) return;
 		this.current = track;
 		this.queue.push(track);
@@ -183,9 +198,6 @@ export default class PlayerManager {
 		} else {
 			this.player.unpause();
 		}
-		if (this.playerEmbedHandler) {
-			this.playerEmbedHandler.updateEmbed(this.current, this.state, this.queue.length > 0 ? this.queue[0] : undefined);
-		}
 	}
 
 	public stop(force: boolean): void {
@@ -206,9 +218,21 @@ export default class PlayerManager {
 			this.setRepeat(true);
 			this.setRepeatAll(false);
 		}
-		if (this.playerEmbedHandler) {
-			this.playerEmbedHandler.updateEmbed(this.current, this.state, this.current);
-		}
+		if (this.playerEmbedHandler)
+			this.playerEmbedHandler.updateEmbed(
+				this.current,
+				this.state,
+				this.state.repeat ? this.current : this.queue.length > 0 ? this.queue[0] : undefined
+			);
+		if (this.socketServer)
+			this.socketServer.io
+				.to(this.guildId)
+				.emit(
+					'statechange',
+					this.state,
+					this.current,
+					this.state.repeat ? this.current : this.queue.length > 0 ? this.queue[0] : undefined
+				);
 	}
 
 	public repeatAll(): void {
@@ -220,9 +244,47 @@ export default class PlayerManager {
 			this.setRepeatAll(true);
 			this.setRepeat(false);
 		}
-		if (this.playerEmbedHandler) {
+		if (this.playerEmbedHandler)
 			this.playerEmbedHandler.updateEmbed(this.current, this.state, this.queue.length > 0 ? this.queue[0] : this.current);
+		if (this.socketServer)
+			this.socketServer.io
+				.to(this.guildId)
+				.emit('statechange', this.state, this.current, this.queue.length > 0 ? this.queue[0] : this.current);
+	}
+
+	public shuffle(): void {
+		if (!this.player) return;
+		if (!this.current) return;
+		if (this.queue.length === 0) return;
+		this.setIdletime(0);
+		this.setPlaying(true);
+		this.setPaused(false);
+		this.setRepeat(false);
+		this.setRepeatAll(false);
+		let shuffle: MediaTrack[] = this.queue;
+		shuffle.push(this.current);
+		let currentIndex = shuffle.length,
+			temporaryValue,
+			randomIndex;
+
+		while (0 !== currentIndex) {
+			randomIndex = Math.floor(Math.random() * currentIndex);
+			currentIndex--;
+
+			// And swap it with the current element.
+			temporaryValue = shuffle[currentIndex];
+			shuffle[currentIndex] = shuffle[randomIndex];
+			shuffle[randomIndex] = temporaryValue;
 		}
+		this.queue = shuffle;
+		this.play();
+
+		if (this.playerEmbedHandler)
+			this.playerEmbedHandler.updateEmbed(this.current, this.state, this.queue.length > 0 ? this.queue[0] : undefined);
+		if (this.socketServer)
+			this.socketServer.io
+				.to(this.guildId)
+				.emit('statechange', this.state, this.current, this.queue.length > 0 ? this.queue[0] : undefined);
 	}
 
 	public volume(number: number): void {
@@ -234,9 +296,12 @@ export default class PlayerManager {
 			this.audioResource.volume.setVolume(number / 100);
 			this.setVolume(number);
 		}
-		if (this.playerEmbedHandler && this.current) {
-			this.playerEmbedHandler.updateEmbed(this.current, this.state, this.queue.length > 0 ? this.queue[0] : undefined);
-		}
+		if (this.playerEmbedHandler && this.state.playing)
+			this.playerEmbedHandler.updateEmbed(this.current!, this.state, this.queue.length > 0 ? this.queue[0] : undefined);
+		if (this.socketServer && this.state.playing)
+			this.socketServer.io
+				.to(this.guildId)
+				.emit('statechange', this.state, this.current!, this.queue.length > 0 ? this.queue[0] : undefined);
 	}
 
 	//queue methodes
