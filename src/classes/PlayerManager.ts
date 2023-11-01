@@ -7,7 +7,7 @@ import {
 	VoiceConnection,
 	VoiceConnectionStatus,
 } from '@discordjs/voice';
-import { GuildMember, Message } from 'discord.js';
+import { GuildMember, Message, VoiceBasedChannel } from 'discord.js';
 import { createPlayer, createResourceStream } from '../utils/utils';
 import { MediaTrack, PlayerState } from '../interfaces';
 import PlayerEmbedHandler from './PlayerEmbedHandler';
@@ -26,6 +26,7 @@ export default class PlayerManager {
 	private socketServer: SocketServer | null;
 	public main: Main;
 	public guildId: string;
+	public voiceChannel: VoiceBasedChannel | null = null;
 	public playerEmbedHandler: PlayerEmbedHandler | null = null;
 	public connection: VoiceConnection | null = null;
 	public player: AudioPlayer | null = null;
@@ -61,6 +62,7 @@ export default class PlayerManager {
 			this.connection.destroy();
 			this.connection = null;
 		}
+		this.voiceChannel = null;
 		this.audioResource = null;
 		this.current = null;
 		this.queue = [];
@@ -79,15 +81,15 @@ export default class PlayerManager {
 
 	public createVoiceConnection(member: GuildMember, playerEmbed: false | Message): VoiceConnection {
 		if (!this.connection) {
-			const voiceChannel = member.voice.channel;
+			this.voiceChannel = member.voice.channel!;
 			this.connection = joinVoiceChannel({
-				channelId: voiceChannel!.id,
-				guildId: voiceChannel!.guild.id,
-				adapterCreator: voiceChannel!.guild.voiceAdapterCreator,
+				channelId: this.voiceChannel.id,
+				guildId: this.voiceChannel.guild.id,
+				adapterCreator: this.voiceChannel.guild.voiceAdapterCreator,
 			});
 			this.setConnected(true);
 			this.player = createPlayer(NoSubscriberBehavior.Play);
-			this.connection.subscribe(this.player!);
+			this.connection.subscribe(this.player);
 			this.connection.on(VoiceConnectionStatus.Disconnected, () => {
 				this.destroyVoiceConnection();
 			});

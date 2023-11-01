@@ -329,7 +329,6 @@ async function searchYoutube(query: string, user: User, channel: VoiceChannel): 
 		return 'No results found.';
 	}
 	if (!result) {
-		console.log(`Search that returned undefined: ${query}`);
 		return 'No results found.';
 	}
 	const data: MediaTrack = {

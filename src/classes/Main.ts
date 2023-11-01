@@ -15,6 +15,7 @@ import {
 import { Command, Config } from '../interfaces';
 import PlayerManager from './PlayerManager';
 import SocketServer from './SocketServer';
+import PlaylistManager from './PlaylistManager';
 
 export default class Main {
 	public readonly commands: Command[] = getCommands();
@@ -33,7 +34,7 @@ export default class Main {
 		await this.client.user.setAvatar(this.config.avatar).catch(() => {});
 		console.log('Bot ready!');
 		if (this.config.websocket.activated) {
-			this.socketServer = new SocketServer(this.config.websocket);
+			this.socketServer = new SocketServer(this.config.websocket, this);
 		}
 	}
 
@@ -104,6 +105,11 @@ export default class Main {
 					if (volume < 0) volume = 1;
 					if (volume > 100) volume = 100;
 					playerManager.volume(volume);
+				}
+				if (message.content.startsWith('!')) {
+					const name = message.content.replace('!', '').trim();
+					const playlistManager = new PlaylistManager(this);
+					playlistManager.playSocket(name, message.guildId!);
 				}
 			}
 
