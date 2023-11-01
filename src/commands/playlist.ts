@@ -48,31 +48,31 @@ export default {
 		if (interaction.options.getSubcommand() === 'create') {
 			const name = interaction.options.getString('name', true);
 			const description = interaction.options.getString('description') || '';
-			const playlistManager = new PlaylistManager(main, interaction);
-			playlistManager.create(name, description);
+			const playlistManager = new PlaylistManager(main);
+			playlistManager.create(name, description, interaction);
 		}
 
 		if (interaction.options.getSubcommand() === 'remove') {
 			const name = interaction.options.getString('name', true);
-			const playlistManager = new PlaylistManager(main, interaction);
-			playlistManager.remove(name);
+			const playlistManager = new PlaylistManager(main);
+			playlistManager.remove(name, interaction);
 		}
 
 		if (interaction.options.getSubcommand() === 'list') {
-			const playlistManager = new PlaylistManager(main, interaction);
-			playlistManager.list();
+			const playlistManager = new PlaylistManager(main);
+			playlistManager.list(interaction);
 		}
 
 		if (interaction.options.getSubcommand() === 'manage') {
 			const name = interaction.options.getString('name', true);
-			const playlistManager = new PlaylistManager(main, interaction);
-			playlistManager.manage(name);
+			const playlistManager = new PlaylistManager(main);
+			playlistManager.manage(name, interaction);
 		}
 
 		if (interaction.options.getSubcommand() === 'play') {
 			const name = interaction.options.getString('name', true);
-			const playlistManager = new PlaylistManager(main, interaction);
-			playlistManager.play(name);
+			const playlistManager = new PlaylistManager(main);
+			playlistManager.play(name, interaction);
 		}
 	},
 };
