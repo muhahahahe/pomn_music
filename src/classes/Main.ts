@@ -181,6 +181,10 @@ export default class Main {
 				playerManager.repeatAll();
 			}
 
+			if (resolvedReaction.reaction.emoji.name === '🔀') {
+				playerManager.shuffle();
+			}
+
 			if (resolvedReaction.reaction.emoji.name === '⏏️') {
 				playerManager.stop(true);
 			}

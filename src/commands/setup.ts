@@ -4,7 +4,7 @@ import Main from '../classes/Main';
 import { addReaction, deleteMessage, getMusicChannelMessage, removeMusicChannelConfig, updateMusicChannelConfig } from '../utils/utils';
 import { createBasicPlayerEmbed } from '../utils/embeds';
 
-const emojis = ['🎶', '⏯️', '⏭️', '⏹️', '🔂', '🔁', '⏏️'];
+const emojis = ['🎶', '⏯️', '⏭️', '⏹️', '🔂', '🔁', '🔀', '⏏️'];
 export default {
 	data: new SlashCommandBuilder()
 		.setName('setup')
