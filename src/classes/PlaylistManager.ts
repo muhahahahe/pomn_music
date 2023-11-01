@@ -22,11 +22,12 @@ import { MediaTrack, Playlist } from '../interfaces';
 import { checkURL, getMediaFile, getMusicChannelMessage, getPlayerManager, getYoutube, writePlaylists } from '../utils/utils';
 import Main from './Main';
 import { createAddTrackModal } from '../utils/modals';
+import PlayerManager from './PlayerManager';
 
 export default class PlaylistManager {
-	private interaction: ChatInputCommandInteraction;
+	private interaction: ChatInputCommandInteraction | null = null;
 	private playlists: Playlist[] = require('../data/playlists.json');
-	private guildPlaylists: Playlist[];
+	private guildPlaylists: Playlist[] = [];
 	private currentEmbed: EmbedBuilder = new EmbedBuilder();
 	private currentActionRow: APIActionRowComponent<APIMessageActionRowComponent>[] = [];
 	private currentPlaylists: Playlist[] = [];
@@ -35,15 +36,14 @@ export default class PlaylistManager {
 	private currentPage: number = 1;
 	public main: Main;
 
-	constructor(main: Main, interaction: ChatInputCommandInteraction) {
+	constructor(main: Main) {
 		this.main = main;
-		this.interaction = interaction;
-		this.guildPlaylists = this.playlists.filter((playlist) => playlist.guildId === interaction.guildId);
 	}
 
 	private listenForList(reply: InteractionResponse): void {
+		if (!this.interaction) return;
 		const collector = reply.createMessageComponentCollector({
-			filter: (interaction) => interaction.user.id === this.interaction.user.id,
+			filter: (interaction) => interaction.user.id === this.interaction!.user.id,
 			time: 1_800_000 /* 30 minutes */,
 		});
 
@@ -91,8 +91,9 @@ export default class PlaylistManager {
 	}
 
 	private listenForManage(reply: InteractionResponse): void {
+		if (!this.interaction) return;
 		const collector = reply.createMessageComponentCollector({
-			filter: (interaction) => interaction.user.id === this.interaction.user.id,
+			filter: (interaction) => interaction.user.id === this.interaction!.user.id,
 			time: 3_600_000 /* 1 hour */,
 			dispose: true,
 		});
@@ -133,10 +134,10 @@ export default class PlaylistManager {
 							const check = await checkURL(url);
 							let track: MediaTrack | string = 'Could not resolve url!';
 							if (check === 'youtube') {
-								track = await getYoutube(url, this.interaction.user);
+								track = await getYoutube(url, this.interaction!.user);
 							}
 							if (check === 'media') {
-								track = await getMediaFile(url, this.interaction.user);
+								track = await getMediaFile(url, this.interaction!.user);
 							}
 							if (typeof track === 'string') {
 								mod.reply({ content: track, ephemeral: true });
@@ -148,7 +149,7 @@ export default class PlaylistManager {
 							this.currentTracks = this.currentPlaylist!.tracks.slice((this.currentPage - 1) * 25, this.currentPage * 25 - 1);
 							this.getPlaylistManage();
 							mod.reply({ content: `Added *${track.title}* to the playlist!`, ephemeral: true });
-							this.interaction.editReply({ embeds: [this.currentEmbed], components: this.currentActionRow });
+							this.interaction!.editReply({ embeds: [this.currentEmbed], components: this.currentActionRow });
 						})
 						.catch(() => {});
 					this.playlists = this.playlists.filter((p) => p.name === this.currentPlaylist!.name);
@@ -210,8 +211,9 @@ export default class PlaylistManager {
 		}
 	}
 
-	public create(name: string, description: string): void {
-		if (this.playlists.find((playlist) => playlist.name === name)) {
+	public create(name: string, description: string, interaction: ChatInputCommandInteraction): void {
+		this.interaction = interaction;
+		if (this.playlists.find((playlist) => playlist.name === name && playlist.guildId === this.interaction!.guildId)) {
 			this.interaction.reply({ content: `A playlist with the name: ${name}, already exists!`, ephemeral: true }).catch(() => {});
 			return;
 		}
@@ -223,13 +225,15 @@ export default class PlaylistManager {
 			tracks: [],
 		};
 		this.playlists.push(data);
+		this.guildPlaylists.push(data);
 		writePlaylists(this.playlists);
 
 		this.interaction.reply({ content: `Playlist *${name}* created!`, ephemeral: this.main.config.silent_mode }).catch(() => {});
 	}
 
-	public remove(name: string): void {
-		const playlist = this.playlists.find((playlist) => playlist.name === name && playlist.guildId === this.interaction.guildId!);
+	public remove(name: string, interaction: ChatInputCommandInteraction): void {
+		this.interaction = interaction;
+		const playlist = this.playlists.find((playlist) => playlist.name === name && playlist.guildId === this.interaction!.guildId!);
 		if (!playlist) {
 			this.interaction.reply({ content: 'A playlist with that name does not exist!', ephemeral: true }).catch(() => {});
 			return;
@@ -242,13 +246,16 @@ export default class PlaylistManager {
 		}
 
 		this.playlists = this.playlists.filter((p) => p !== playlist);
+		this.guildPlaylists = this.guildPlaylists.filter((p) => p !== playlist);
 		writePlaylists(this.playlists);
 
 		this.interaction.reply({ content: `Playlist *${playlist.name}* removed!`, ephemeral: this.main.config.silent_mode }).catch(() => {});
 	}
 
-	public async list(): Promise<void> {
-		this.currentPlaylists = this.playlists.filter((playlist) => playlist.guildId === this.interaction.guildId);
+	public async list(interaction: ChatInputCommandInteraction): Promise<void> {
+		this.interaction = interaction;
+		this.currentPlaylists = this.playlists.filter((playlist) => playlist.guildId === this.interaction!.guildId);
+		this.guildPlaylists = this.playlists.filter((playlist) => playlist.guildId === this.interaction!.guildId);
 		if (this.currentPlaylists && this.currentPlaylists.length === 0) {
 			this.interaction.reply({ content: 'No playlists created yet!', ephemeral: true }).catch(() => {});
 			return;
@@ -266,8 +273,9 @@ export default class PlaylistManager {
 		this.listenForList(reply);
 	}
 
-	public async manage(name: string): Promise<void> {
-		const playlist = this.playlists.find((playlist) => playlist.name === name && playlist.guildId === this.interaction.guildId!);
+	public async manage(name: string, interaction: ChatInputCommandInteraction): Promise<void> {
+		this.interaction = interaction;
+		const playlist = this.playlists.find((playlist) => playlist.name === name && playlist.guildId === this.interaction!.guildId!);
 		if (!playlist) {
 			this.interaction.reply({ content: 'A playlist with that name does not exist!', ephemeral: true }).catch(() => {});
 			return;
@@ -288,8 +296,9 @@ export default class PlaylistManager {
 		this.listenForManage(reply);
 	}
 
-	public async play(name: string): Promise<void> {
-		const playlist = this.playlists.find((playlist) => playlist.name === name && playlist.guildId === this.interaction.guildId!);
+	public async play(name: string, interaction: ChatInputCommandInteraction): Promise<void> {
+		this.interaction = interaction;
+		const playlist = this.playlists.find((playlist) => playlist.name === name && playlist.guildId === this.interaction!.guildId!);
 		if (!playlist) {
 			this.interaction.reply({ content: 'A playlist with that name does not exist!', ephemeral: true }).catch(() => {});
 			return;
@@ -315,5 +324,17 @@ export default class PlaylistManager {
 		});
 		if (playerManager.isStopped()) playerManager.play();
 		this.interaction.reply({ content: `Playing playlist *${playlist.name}*!`, ephemeral: this.main.config.silent_mode });
+	}
+
+	public playSocket(name: string, guildId: string): void {
+		const playlist = this.playlists.find((playlist) => playlist.name === name && playlist.guildId === guildId);
+		if (!playlist) return;
+		if (playlist.tracks.length === 0) return;
+		const playerManager = PlayerManager.instances.get(guildId);
+		if (!playerManager) return;
+		playlist.tracks.forEach((track) => {
+			playerManager.addTrack(track);
+		});
+		if (playerManager.isStopped()) playerManager.play();
 	}
 }
