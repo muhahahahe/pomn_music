@@ -117,10 +117,7 @@ export default class PlayerManager {
 					this.setIdletime(0);
 					if (this.playerEmbedHandler)
 						this.playerEmbedHandler.updateEmbed(this.current!, this.state, this.queue.length > 0 ? this.queue[0] : undefined);
-					if (this.socketServer)
-						this.socketServer.io
-							.to(this.guildId)
-							.emit('playing', this.state, this.current!, this.queue.length > 0 ? this.queue[0] : undefined);
+					if (this.socketServer) this.socketServer.io.to(this.guildId).emit('playing', this.state, this.current!);
 				}
 				if (newState.status === AudioPlayerStatus.Paused) {
 					this.setPlaying(false);
@@ -128,10 +125,7 @@ export default class PlayerManager {
 					this.setIdletime(Date.now());
 					if (this.playerEmbedHandler)
 						this.playerEmbedHandler.updateEmbed(this.current!, this.state, this.queue.length > 0 ? this.queue[0] : undefined);
-					if (this.socketServer)
-						this.socketServer.io
-							.to(this.guildId)
-							.emit('playing', this.state, this.current!, this.queue.length > 0 ? this.queue[0] : undefined);
+					if (this.socketServer) this.socketServer.io.to(this.guildId).emit('paused', this.state, this.current!);
 				}
 			});
 			if (this.socketServer) this.socketServer.io.to(this.guildId).emit('connected', this.state);
@@ -226,15 +220,7 @@ export default class PlayerManager {
 				this.state,
 				this.state.repeat ? this.current : this.queue.length > 0 ? this.queue[0] : undefined
 			);
-		if (this.socketServer)
-			this.socketServer.io
-				.to(this.guildId)
-				.emit(
-					'statechange',
-					this.state,
-					this.current,
-					this.state.repeat ? this.current : this.queue.length > 0 ? this.queue[0] : undefined
-				);
+		if (this.socketServer) this.socketServer.io.to(this.guildId).emit('statechange', this.state, this.current);
 	}
 
 	public repeatAll(): void {
@@ -248,10 +234,7 @@ export default class PlayerManager {
 		}
 		if (this.playerEmbedHandler)
 			this.playerEmbedHandler.updateEmbed(this.current, this.state, this.queue.length > 0 ? this.queue[0] : this.current);
-		if (this.socketServer)
-			this.socketServer.io
-				.to(this.guildId)
-				.emit('statechange', this.state, this.current, this.queue.length > 0 ? this.queue[0] : this.current);
+		if (this.socketServer) this.socketServer.io.to(this.guildId).emit('statechange', this.state, this.current);
 	}
 
 	public shuffle(): void {
@@ -283,10 +266,7 @@ export default class PlayerManager {
 
 		if (this.playerEmbedHandler)
 			this.playerEmbedHandler.updateEmbed(this.current, this.state, this.queue.length > 0 ? this.queue[0] : undefined);
-		if (this.socketServer)
-			this.socketServer.io
-				.to(this.guildId)
-				.emit('statechange', this.state, this.current, this.queue.length > 0 ? this.queue[0] : undefined);
+		if (this.socketServer) this.socketServer.io.to(this.guildId).emit('statechange', this.state, this.current);
 	}
 
 	public volume(number: number): void {
@@ -300,10 +280,7 @@ export default class PlayerManager {
 		}
 		if (this.playerEmbedHandler && this.state.playing)
 			this.playerEmbedHandler.updateEmbed(this.current!, this.state, this.queue.length > 0 ? this.queue[0] : undefined);
-		if (this.socketServer && this.state.playing)
-			this.socketServer.io
-				.to(this.guildId)
-				.emit('statechange', this.state, this.current!, this.queue.length > 0 ? this.queue[0] : undefined);
+		if (this.socketServer && this.state.playing) this.socketServer.io.to(this.guildId).emit('statechange', this.state, this.current!);
 	}
 
 	//queue methodes

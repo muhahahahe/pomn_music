@@ -72,14 +72,16 @@ export default class SocketServer {
 			let playerManager: PlayerManager | undefined = undefined;
 			if (PlayerManager.instances.has(socket.data.guildId)) {
 				playerManager = PlayerManager.instances.get(socket.data.guildId)!;
-				socket.emit('state', playerManager.state, playerManager.current);
+				socket.emit('statechange', playerManager.state, playerManager.current);
 			} else {
 				socket.emit('disconnected');
 			}
 
-			socket.on('disconnect', () => {
-				socket.leave(socket.data.guildId);
-				console.log(`Client: ${socket.data.client} disconnected from guild: ${socket.data.guildId}`);
+			socket.on('test', () => {
+				socket.emit('success');
+				console.log(`  Connection test for ${socket.data.client} to guild: ${socket.data.guildId} successful!`);
+				socket.disconnect();
+				return;
 			});
 
 			socket.on('pause', () => {
