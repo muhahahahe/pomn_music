@@ -37,7 +37,12 @@ export default class SocketServer {
 			server = http.createServer();
 		}
 
-		this.io = new Server(server);
+		this.io = new Server(server, {
+			cors: {
+				origin: '*',
+				methods: ['GET', 'POST'],
+			},
+		});
 
 		this.io.use((socket, next) => {
 			const token = socket.handshake.auth.token;
