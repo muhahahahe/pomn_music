@@ -12,7 +12,7 @@ To run POMN Music on your computer or server, you will need the following prereq
 - Node.js version 18+
 - FFMPEG
 
-If you have a previous version installed, make sure to make a backup of your data folder and dont overwrite the `.env` file. after extracting copy the data folder back in.
+If you have a previous version installed, make sure to make a backup of your data folder and dont overwrite the `.env` file. after extracting copy the data folder back in and make that the `config.json` includes possible new values.
 
 You can install POMN Music by following these steps:
 
@@ -34,7 +34,8 @@ You can install POMN Music by following these steps:
    avatar - a link to an image you want to set as the avatar\
    silent_mode - whether you want the bots command responses to be [ephemerals](https://support.discord.com/hc/en-us/articles/1500000580222-Ephemeral-Messages-FAQ#:~:text=An%20%22Ephemeral%20Message%22%20is%20a,long%20enough%2C%20or%20restart%20Discord.)\
    player_embed - whether you want to use the bots special player\
-   playlists - whether you want the playlist feature activated
+   playlists - whether you want the playlist feature activated\
+   websocket - a websocket for controlling the bot from external sources like my FoundryVTT module [pomn_player](https://github.com/muhahahahe/pomn_player)
 
 5. Start the bot:
    
@@ -62,13 +63,17 @@ If you prefer to use Docker to run POMN Music, follow these steps:
    avatar - a link to an image you want to set as the avatar\
    silent_mode - whether you want the bots command responses to be [ephemerals](https://support.discord.com/hc/en-us/articles/1500000580222-Ephemeral-Messages-FAQ#:~:text=An%20%22Ephemeral%20Message%22%20is%20a,long%20enough%2C%20or%20restart%20Discord.)\
    player_embed - whether you want to use the bots special player\
-   playlists - whether you want the playlist feature activated
+   playlists - whether you want the playlist feature activated\
+   websocket - a websocket for controlling the bot from external sources like my FoundryVTT module [pomn_player](https://github.com/muhahahahe/pomn_player)
 
 5. Build the Docker image:
    
-   `docker build -t pomn_music .`
+   `docker build -t pomn_music .`\
+   If you are using the websocket, make sure to change the port in the `Dockerfile` to your selected port in the config.
 
 6. Create a docker-compose.yml file in the same folder with the following content:
+
+   An example docker-compose.yml is included, just change the name by removing the last part of the file that is suitable for your situation (adjust the port if needed when you are using the websocket).
    
    ```
    version: '3'
@@ -98,6 +103,8 @@ To use POMN Music, follow these steps:
 1. Set up the music player channel in a Discord TextChannel by running the `/setup create` command. (requires the option player_embed set to true)
 
 2. Use the `/help` command to see all available functions and how to control the music player.
+
+3. Use `/socket` and set a token, if you are using the websocket.
 
 
 ## Contributing
