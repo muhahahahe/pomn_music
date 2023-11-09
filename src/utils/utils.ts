@@ -23,11 +23,16 @@ import PlayerManager from '../classes/PlayerManager';
 import Main from '../classes/Main';
 
 const playableTypes = [
+	'audio/aac',
+	'audio/flac',
+	'audio/m4a',
 	'audio/mpeg',
 	'audio/mp4',
 	'audio/ogg',
 	'audio/opus',
 	'audio/wav',
+	'audio/webm',
+	'audio/x-flac',
 	'video/mpeg',
 	'video/mp4',
 	'video/ogg',
